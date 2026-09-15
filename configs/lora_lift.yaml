@@ -27,6 +27,16 @@ model:
   # Actions consumed per inference at evaluation time. Training is unaffected.
   n_action_steps: 50
 
+  # SmolVLA resizes every camera to this before SigLIP, regardless of what the
+  # dataset stores. It is the dominant cost in a training step: two cameras at
+  # 512x512 is roughly four times the vision tokens of 256x256.
+  #
+  # null keeps the checkpoint's own 512, which is what the pretrained vision
+  # weights saw. Lowering it buys throughput at the cost of moving the input
+  # further from the pretraining distribution -- reasonable for a feasibility run,
+  # less so when chasing task success.
+  resize_imgs_with_padding: null
+
 lora:
   # 4.1 -- what gets adapted, and why.
   #
@@ -58,23 +68,47 @@ training:
   #
   # batch_size is the first knob to reduce on OOM, gradient_checkpointing the
   # second. Effective batch = batch_size * grad_accum_steps.
-  batch_size: 2
-  grad_accum_steps: 8
+  #
+  # Measured over 30 steps at an effective batch of 8 (short runs measure worker
+  # startup, not steady state):
+  #
+  #   workers=0, 2x4 : 2.48 s/step
+  #   workers=2, 2x4 : 1.96
+  #   workers=4, 2x4 : 2.78   -- too many for this CPU
+  #   workers=2, 4x2 : 1.89   <- chosen
+  #   workers=2, 8x1 : 2.10
+  #
+  # An earlier sweep found batch 2 optimal, but that was run with workers=0, where
+  # PNG decoding on the main thread was the bottleneck. Once loading is overlapped
+  # the GPU can feed on a larger micro-batch.
+  batch_size: 4
+  grad_accum_steps: 2
   gradient_checkpointing: false
 
-  steps: 3000
+  # Sized to a ~1 hour budget: 1800 x 1.89 s is about 57 minutes, which buys
+  # ~14 400 samples (1.6 epochs) and 1800 optimizer updates.
+  #
+  # The original 3000 x (2x8) at workers=0 ran ~4 hours for 5.5 epochs. Restore it
+  # if the goal shifts from "does this train on this laptop" to chasing task
+  # success.
+  steps: 1800
   lr: 1.0e-4
   weight_decay: 1.0e-10
   grad_clip_norm: 10.0
-  warmup_steps: 200
+
+  # Scaled down with the run. At the original 200 the learning rate would spend a
+  # ninth of training still warming up.
+  warmup_steps: 120
 
   log_every: 25
-  eval_every: 250
-  save_every: 500
+  eval_every: 200
+  save_every: 400
 
-  # Dataloader workers. Windows spawns processes rather than forking, so each
-  # worker re-imports torch; 0 keeps it simple and the dataset is local PNG.
-  num_workers: 0
+  # Windows spawns worker processes rather than forking, so each re-imports torch.
+  # That startup dominates short runs -- an 8-step benchmark made workers look 2x
+  # slower -- but amortises over a real run, where 2 workers are 21% faster than 0.
+  # 4 workers are slower again on this CPU.
+  num_workers: 2
 
 vram:
   budget_gb: 5.0

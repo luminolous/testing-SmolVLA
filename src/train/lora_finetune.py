@@ -73,6 +73,7 @@ def build_policy_and_processors(
     ds_meta: Any,
     device: str,
     n_action_steps: int,
+    resize_imgs_with_padding: int | None = None,
 ) -> tuple[Any, Any, Any]:
     """Load the pretrained policy, re-featured for this dataset.
 
@@ -101,6 +102,9 @@ def build_policy_and_processors(
     config.output_features = output_features
     config.n_action_steps = n_action_steps
     config.device = device
+    if resize_imgs_with_padding is not None:
+        # Dominates step cost: vision tokens scale with the square of this.
+        config.resize_imgs_with_padding = (resize_imgs_with_padding,) * 2
     # `wrap_with_peft` refuses to attach adapters when this is unset, on the
     # reasonable grounds that LoRA on randomly initialised weights is pointless.
     # We do load pretrained weights below; the field just is not populated by
@@ -200,8 +204,10 @@ def train(cfg: dict, run_dir: Path, max_steps: int | None = None) -> TrainState:
     )
     logger.info("episodes: %d train, %d val", len(train_eps), len(val_eps))
 
+    resize = model_cfg.get("resize_imgs_with_padding")
     policy, preprocessor, postprocessor = build_policy_and_processors(
-        model_cfg["checkpoint"], ds_meta, device, int(model_cfg["n_action_steps"])
+        model_cfg["checkpoint"], ds_meta, device, int(model_cfg["n_action_steps"]),
+        resize_imgs_with_padding=int(resize) if resize else None,
     )
     delta_timestamps = resolve_delta_timestamps(policy.config, ds_meta)
 

@@ -45,6 +45,7 @@ def main() -> int:
     parser.add_argument("--gradient-checkpointing", action="store_true")
     parser.add_argument("--rank", type=int, default=None)
     parser.add_argument("--warmup-steps", type=int, default=None)
+    parser.add_argument("--num-workers", type=int, default=None)
     parser.add_argument("--debug-logs", action="store_true",
                         help="do not silence third-party loggers")
     args = parser.parse_args()
@@ -60,6 +61,8 @@ def main() -> int:
         cfg["lora"]["r"] = args.rank
     if args.warmup_steps is not None:
         cfg["training"]["warmup_steps"] = args.warmup_steps
+    if args.num_workers is not None:
+        cfg["training"]["num_workers"] = args.num_workers
 
     steps = args.steps
     if args.dry_run:

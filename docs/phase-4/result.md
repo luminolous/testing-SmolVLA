@@ -78,19 +78,47 @@ Without those statistics LeRobot's normalizer silently no-ops — the Phase 1 tr
 and here that would be fatal rather than cosmetic, since training uses normalised
 actions.
 
-### Batch size was measured, not assumed
+### Throughput: two measurements, the first one wrong
 
-Effective batch held at 16 throughout:
+The first sweep held the effective batch at 16 with `num_workers=0` and concluded
+that batch 2 was optimal, since larger micro-batches were slower *per sample*
+(0.371 s at 2×8, 0.423 at 4×4, 0.579 at 8×2).
 
-| Config | Peak VRAM | s/step | s/sample |
-| --- | --- | --- | --- |
-| **2 × 8** | **1.292 GiB** | **5.94** | **0.371** |
-| 4 × 4 | 1.687 GiB | 6.76 | 0.423 |
-| 8 × 2 | 2.476 GiB | 9.27 | 0.579 |
+**That conclusion did not survive a second look.** It was measured with data loading
+on the main thread, where PNG decoding — not the GPU — was the limit. Two further
+mistakes were in the method:
 
-Larger batches are slower *per sample*, not just per step. The GPU is already
-saturated at batch 2 and bigger batches only add memory pressure. There is plenty
-of VRAM headroom (1.29 of 5.0 GiB) but no throughput to buy with it.
+- **Runs were too short.** An 8-step benchmark of `num_workers=2` showed 7.78 s/step
+  against 3.40 for 0 workers, which looks damning. That is Windows process startup:
+  each worker re-imports torch. Over 30 steps the same comparison reverses.
+- **The conclusion was drawn under a bottleneck that was itself removable.** Once
+  loading is overlapped, the GPU can feed on a larger micro-batch after all.
+
+Re-measured over 30 steps at an effective batch of 8:
+
+| Config | s/step | Peak VRAM |
+| --- | --- | --- |
+| workers 0, 2 × 4 | 2.48 | 1.292 GiB |
+| workers 2, 2 × 4 | 1.96 | 1.292 GiB |
+| workers 4, 2 × 4 | 2.78 | — |
+| **workers 2, 4 × 2** | **1.89** | 1.687 GiB |
+| workers 2, 8 × 1 | 2.10 | 2.473 GiB |
+
+Chosen: **2 workers, batch 4, 2 accumulation steps**. Against the original
+configuration that is 0.236 s/sample against 0.303 — **22% faster** — at 1.687 GiB
+of a 5.0 GiB budget.
+
+Four workers are slower than two on this CPU.
+
+### Image resolution is not the lever it looks like
+
+SmolVLA resizes every camera to 512×512 before SigLIP, so 256×256 should cut vision
+tokens roughly fourfold. Measured, it bought **4%** (3.25 against 3.40 s/step).
+
+The vision encoder is not the bottleneck, which is what pointed at data loading in
+the first place. The knob stays available as `model.resize_imgs_with_padding` but
+defaults to the checkpoint's own 512, since lowering it moves the input away from
+the pretraining distribution for almost no gain.
 
 ---
 
@@ -176,17 +204,35 @@ what needs debugging.
 python scripts/train_lora.py
 ```
 
+Sized to a **one-hour budget**, because the goal of this project is to establish
+whether SmolVLA can be trained and run on this laptop at all — not to maximise task
+success. Most of that question is already answered by the dry run: it trains, inside
+1.7 GiB of a 5.0 GiB budget, and the loss moves.
+
 | | |
 | --- | --- |
-| Expected runtime | **~4 hours** (3 000 steps at 4.85 s/step) |
-| Expected peak VRAM | **1.3 GiB**, against a 5.0 GiB budget |
-| Effective batch | 16 (2 × 8 accumulation) |
+| Expected runtime | **~57 minutes** (1 800 steps at 1.89 s/step) |
+| Expected peak VRAM | **1.7 GiB**, against a 5.0 GiB budget |
+| Effective batch | 8 (4 × 2 accumulation), 2 dataloader workers |
 | Data | 180 train episodes / 8 741 frames, 20 val episodes / 925 frames |
-| Epochs | ~5.5 (546 steps per epoch) |
-| Output | `results/phase-4/<timestamp>/` — config, `train.log`, `metrics.json`, and adapter checkpoints every 500 steps |
+| Epochs | ~1.6 (14 400 samples) |
+| Optimizer updates | 1 800 |
+| Output | `results/phase-4/<timestamp>/` — config, `train.log`, `metrics.json`, and adapter checkpoints every 400 steps |
 
-Validation runs every 250 steps and checkpoints are written every 500, so the run
-can be stopped early at any checkpoint without losing the work.
+Validation runs every 200 steps and checkpoints every 400, so the run can be stopped
+early at any checkpoint without losing the work.
+
+### What the hour costs
+
+Cost is per sample, not per step: at 0.236 s/sample an hour buys roughly 15 000
+samples however the steps are arranged. The original 4-hour configuration saw 5.5
+epochs and made 3 000 updates; this one sees 1.6 epochs and makes 1 800.
+
+That is a real reduction in fitting, and it should be read as such if the success
+rate comes out low — §4.6's "training loss plateaus high" branch cannot be
+distinguished from simple under-training at 1.6 epochs. Restoring `steps: 3000` with
+the same batch settings costs about 95 minutes now rather than four hours, and is
+the first thing to try if the model underfits.
 
 If it OOMs — it should not, at 1.3 of 5.0 GiB — the error names the knobs in order.
 
