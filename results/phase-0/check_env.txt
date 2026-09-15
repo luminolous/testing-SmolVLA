@@ -1,0 +1,30 @@
+# Phase 0 raw check output
+
+Recorded: 2026-09-15 13:58
+
+```
+
+environment check  (phase0_check.yaml)
+  [PASS] python                         3.12.4 on Windows
+  [PASS] import torch                   2.11.0+cu128
+  [PASS] import mujoco                  3.1.6
+  [PASS] import robosuite               1.4.1
+  [PASS] import robomimic               0.3.0
+  [PASS] import lerobot                 0.6.1
+  [PASS] import numpy                   2.2.6
+  [PASS] cuda available                 torch 2.11.0+cu128
+  [PASS] gpu device                     NVIDIA GeForce RTX 4050 Laptop GPU
+  [PASS] gpu vram                       6.00 GiB total, 4.94 GiB free (budget 5.0 GiB)
+  [PASS] cuda runtime                   cuda 12.8, capability 8.9
+  [PASS] mujoco_gl backend              wgl
+  [PASS] build env                      Lift/Panda/OSC_POSE, action_dim=7, built in 1.72s
+  [PASS] render gpu                     NVIDIA GeForce RTX 4050 Laptop GPU/PCIe/SSE2
+  [PASS] camera robot0_eye_in_hand      shape=(128, 128, 3) dtype=uint8 min=7 max=254 std=69.4
+  [PASS] camera agentview               shape=(128, 128, 3) dtype=uint8 min=10 max=254 std=55.2
+  [PASS] proprio state                  dim=32
+  [PASS] render vram                    0.36 GiB consumed by the render context
+  [PASS] per-step cost (2 cam @ 128px)  mean=7.14ms p95=7.75ms -> 1.4s per 200-step episode
+
+ALL CHECKS PASSED
+
+```

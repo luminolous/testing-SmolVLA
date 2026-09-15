@@ -1,0 +1,90 @@
+2026-09-15 16:50:47,905 INFO episodes: 180 train, 20 val
+2026-09-15 16:51:10,099 INFO frames: 8741 train, 925 val
+2026-09-15 16:51:10,160 INFO Wrapped smolvla with PEFT (LoraConfig)
+2026-09-15 16:51:10,162 INFO LoRA: 0.74M trainable of 450.8M (0.165%)
+2026-09-15 16:51:42,049 INFO step    25/1800  loss 3.5824  lr 2.17e-05  peak VRAM 1.69 GiB  1.28 s/step
+2026-09-15 16:51:57,555 INFO step    50/1800  loss 3.3465  lr 4.25e-05  peak VRAM 1.69 GiB  0.95 s/step
+2026-09-15 16:52:13,152 INFO step    75/1800  loss 3.0000  lr 6.33e-05  peak VRAM 1.69 GiB  0.84 s/step
+2026-09-15 16:52:29,286 INFO step   100/1800  loss 1.6973  lr 8.42e-05  peak VRAM 1.69 GiB  0.79 s/step
+2026-09-15 16:52:45,572 INFO step   125/1800  loss 1.3828  lr 1.00e-04  peak VRAM 1.69 GiB  0.76 s/step
+2026-09-15 16:53:02,084 INFO step   150/1800  loss 1.2501  lr 1.00e-04  peak VRAM 1.69 GiB  0.75 s/step
+2026-09-15 16:53:18,773 INFO step   175/1800  loss 1.1809  lr 1.00e-04  peak VRAM 1.69 GiB  0.73 s/step
+2026-09-15 16:53:35,783 INFO step   200/1800  loss 1.0623  lr 1.00e-04  peak VRAM 1.69 GiB  0.73 s/step
+2026-09-15 16:53:53,519 INFO step   200  val loss 1.1774
+2026-09-15 16:54:09,429 INFO step   225/1800  loss 1.0164  lr 1.00e-04  peak VRAM 1.69 GiB  0.80 s/step
+2026-09-15 16:54:26,459 INFO step   250/1800  loss 1.0268  lr 1.00e-04  peak VRAM 1.69 GiB  0.79 s/step
+2026-09-15 16:54:43,703 INFO step   275/1800  loss 0.9835  lr 1.00e-04  peak VRAM 1.69 GiB  0.78 s/step
+2026-09-15 16:55:01,310 INFO step   300/1800  loss 0.9356  lr 1.00e-04  peak VRAM 1.69 GiB  0.77 s/step
+2026-09-15 16:55:18,978 INFO step   325/1800  loss 0.9648  lr 1.00e-04  peak VRAM 1.69 GiB  0.77 s/step
+2026-09-15 16:55:36,811 INFO step   350/1800  loss 0.9684  lr 1.00e-04  peak VRAM 1.69 GiB  0.76 s/step
+2026-09-15 16:55:55,188 INFO step   375/1800  loss 0.8641  lr 1.00e-04  peak VRAM 1.69 GiB  0.76 s/step
+2026-09-15 16:56:13,368 INFO step   400/1800  loss 0.8906  lr 1.00e-04  peak VRAM 1.69 GiB  0.76 s/step
+2026-09-15 16:56:31,405 INFO step   400  val loss 0.9857
+2026-09-15 16:56:31,813 INFO saved adapter to C:\Users\Syauqi Nabil\Robotics\testing-SmolVLA\results\phase-4\20260915-165042\checkpoint-400 (2.9 MiB)
+2026-09-15 16:56:48,921 INFO step   425/1800  loss 0.8286  lr 1.00e-04  peak VRAM 1.69 GiB  0.80 s/step
+2026-09-15 16:57:06,787 INFO step   450/1800  loss 0.9023  lr 1.00e-04  peak VRAM 1.69 GiB  0.79 s/step
+2026-09-15 16:57:24,876 INFO step   475/1800  loss 0.9089  lr 1.00e-04  peak VRAM 1.69 GiB  0.79 s/step
+2026-09-15 16:57:43,185 INFO step   500/1800  loss 0.8374  lr 1.00e-04  peak VRAM 1.69 GiB  0.79 s/step
+2026-09-15 16:58:01,349 INFO step   525/1800  loss 0.8679  lr 1.00e-04  peak VRAM 1.69 GiB  0.78 s/step
+2026-09-15 16:58:19,756 INFO step   550/1800  loss 0.8180  lr 1.00e-04  peak VRAM 1.69 GiB  0.78 s/step
+2026-09-15 16:58:38,336 INFO step   575/1800  loss 0.8193  lr 1.00e-04  peak VRAM 1.69 GiB  0.78 s/step
+2026-09-15 16:58:57,205 INFO step   600/1800  loss 0.7805  lr 1.00e-04  peak VRAM 1.69 GiB  0.78 s/step
+2026-09-15 16:59:14,631 INFO step   600  val loss 0.8913
+2026-09-15 16:59:31,892 INFO step   625/1800  loss 0.8356  lr 1.00e-04  peak VRAM 1.69 GiB  0.80 s/step
+2026-09-15 16:59:50,313 INFO step   650/1800  loss 0.7990  lr 1.00e-04  peak VRAM 1.69 GiB  0.80 s/step
+2026-09-15 17:00:08,747 INFO step   675/1800  loss 0.7918  lr 1.00e-04  peak VRAM 1.69 GiB  0.80 s/step
+2026-09-15 17:00:27,323 INFO step   700/1800  loss 0.8063  lr 1.00e-04  peak VRAM 1.69 GiB  0.80 s/step
+2026-09-15 17:00:46,236 INFO step   725/1800  loss 0.7810  lr 1.00e-04  peak VRAM 1.69 GiB  0.79 s/step
+2026-09-15 17:01:05,393 INFO step   750/1800  loss 0.7716  lr 1.00e-04  peak VRAM 1.69 GiB  0.79 s/step
+2026-09-15 17:01:24,604 INFO step   775/1800  loss 0.7831  lr 1.00e-04  peak VRAM 1.69 GiB  0.79 s/step
+2026-09-15 17:01:44,081 INFO step   800/1800  loss 0.7536  lr 1.00e-04  peak VRAM 1.69 GiB  0.79 s/step
+2026-09-15 17:02:01,742 INFO step   800  val loss 0.9445
+2026-09-15 17:02:02,135 INFO saved adapter to C:\Users\Syauqi Nabil\Robotics\testing-SmolVLA\results\phase-4\20260915-165042\checkpoint-800 (2.9 MiB)
+2026-09-15 17:02:19,592 INFO step   825/1800  loss 0.7728  lr 1.00e-04  peak VRAM 1.69 GiB  0.81 s/step
+2026-09-15 17:02:38,577 INFO step   850/1800  loss 0.7457  lr 1.00e-04  peak VRAM 1.69 GiB  0.81 s/step
+2026-09-15 17:02:57,573 INFO step   875/1800  loss 0.7724  lr 1.00e-04  peak VRAM 1.69 GiB  0.81 s/step
+2026-09-15 17:03:16,693 INFO step   900/1800  loss 0.8551  lr 1.00e-04  peak VRAM 1.69 GiB  0.81 s/step
+2026-09-15 17:03:35,830 INFO step   925/1800  loss 0.7746  lr 1.00e-04  peak VRAM 1.69 GiB  0.81 s/step
+2026-09-15 17:03:54,931 INFO step   950/1800  loss 0.7415  lr 1.00e-04  peak VRAM 1.69 GiB  0.81 s/step
+2026-09-15 17:04:14,134 INFO step   975/1800  loss 0.7755  lr 1.00e-04  peak VRAM 1.69 GiB  0.80 s/step
+2026-09-15 17:04:33,515 INFO step  1000/1800  loss 0.7348  lr 1.00e-04  peak VRAM 1.69 GiB  0.80 s/step
+2026-09-15 17:04:51,154 INFO step  1000  val loss 0.8694
+2026-09-15 17:05:09,055 INFO step  1025/1800  loss 0.7096  lr 1.00e-04  peak VRAM 1.69 GiB  0.82 s/step
+2026-09-15 17:05:28,111 INFO step  1050/1800  loss 0.7778  lr 1.00e-04  peak VRAM 1.69 GiB  0.82 s/step
+2026-09-15 17:05:47,279 INFO step  1075/1800  loss 0.7795  lr 1.00e-04  peak VRAM 1.69 GiB  0.82 s/step
+2026-09-15 17:06:21,259 INFO step  1100/1800  loss 0.7229  lr 1.00e-04  peak VRAM 1.69 GiB  0.83 s/step
+2026-09-15 17:06:39,845 INFO step  1125/1800  loss 0.7568  lr 1.00e-04  peak VRAM 1.69 GiB  0.83 s/step
+2026-09-15 17:06:58,996 INFO step  1150/1800  loss 0.7212  lr 1.00e-04  peak VRAM 1.69 GiB  0.83 s/step
+2026-09-15 17:07:18,172 INFO step  1175/1800  loss 0.7396  lr 1.00e-04  peak VRAM 1.69 GiB  0.82 s/step
+2026-09-15 17:07:37,851 INFO step  1200/1800  loss 0.7265  lr 1.00e-04  peak VRAM 1.69 GiB  0.82 s/step
+2026-09-15 17:07:56,043 INFO step  1200  val loss 0.8435
+2026-09-15 17:07:56,481 INFO saved adapter to C:\Users\Syauqi Nabil\Robotics\testing-SmolVLA\results\phase-4\20260915-165042\checkpoint-1200 (2.9 MiB)
+2026-09-15 17:08:14,391 INFO step  1225/1800  loss 0.7006  lr 1.00e-04  peak VRAM 1.69 GiB  0.84 s/step
+2026-09-15 17:08:33,298 INFO step  1250/1800  loss 0.6887  lr 1.00e-04  peak VRAM 1.69 GiB  0.83 s/step
+2026-09-15 17:08:52,772 INFO step  1275/1800  loss 0.6955  lr 1.00e-04  peak VRAM 1.69 GiB  0.83 s/step
+2026-09-15 17:09:11,923 INFO step  1300/1800  loss 0.6923  lr 1.00e-04  peak VRAM 1.69 GiB  0.83 s/step
+2026-09-15 17:09:31,193 INFO step  1325/1800  loss 0.6980  lr 1.00e-04  peak VRAM 1.69 GiB  0.83 s/step
+2026-09-15 17:09:50,622 INFO step  1350/1800  loss 0.7065  lr 1.00e-04  peak VRAM 1.69 GiB  0.83 s/step
+2026-09-15 17:10:09,796 INFO step  1375/1800  loss 0.7071  lr 1.00e-04  peak VRAM 1.69 GiB  0.83 s/step
+2026-09-15 17:10:29,084 INFO step  1400/1800  loss 0.6879  lr 1.00e-04  peak VRAM 1.69 GiB  0.83 s/step
+2026-09-15 17:10:47,753 INFO step  1400  val loss 0.7947
+2026-09-15 17:11:05,572 INFO step  1425/1800  loss 0.7191  lr 1.00e-04  peak VRAM 1.69 GiB  0.84 s/step
+2026-09-15 17:11:24,495 INFO step  1450/1800  loss 0.6939  lr 1.00e-04  peak VRAM 1.69 GiB  0.84 s/step
+2026-09-15 17:11:43,556 INFO step  1475/1800  loss 0.6492  lr 1.00e-04  peak VRAM 1.69 GiB  0.84 s/step
+2026-09-15 17:12:02,727 INFO step  1500/1800  loss 0.6692  lr 1.00e-04  peak VRAM 1.69 GiB  0.84 s/step
+2026-09-15 17:12:21,828 INFO step  1525/1800  loss 0.6417  lr 1.00e-04  peak VRAM 1.69 GiB  0.83 s/step
+2026-09-15 17:12:41,534 INFO step  1550/1800  loss 0.6709  lr 1.00e-04  peak VRAM 1.69 GiB  0.83 s/step
+2026-09-15 17:13:00,948 INFO step  1575/1800  loss 0.6692  lr 1.00e-04  peak VRAM 1.69 GiB  0.83 s/step
+2026-09-15 17:13:20,675 INFO step  1600/1800  loss 0.6924  lr 1.00e-04  peak VRAM 1.69 GiB  0.83 s/step
+2026-09-15 17:13:39,712 INFO step  1600  val loss 0.7684
+2026-09-15 17:13:40,236 INFO saved adapter to C:\Users\Syauqi Nabil\Robotics\testing-SmolVLA\results\phase-4\20260915-165042\checkpoint-1600 (2.9 MiB)
+2026-09-15 17:13:58,234 INFO step  1625/1800  loss 0.6800  lr 1.00e-04  peak VRAM 1.69 GiB  0.84 s/step
+2026-09-15 17:14:17,278 INFO step  1650/1800  loss 0.6623  lr 1.00e-04  peak VRAM 1.69 GiB  0.84 s/step
+2026-09-15 17:14:36,466 INFO step  1675/1800  loss 0.6666  lr 1.00e-04  peak VRAM 1.69 GiB  0.84 s/step
+2026-09-15 17:14:56,060 INFO step  1700/1800  loss 0.6918  lr 1.00e-04  peak VRAM 1.69 GiB  0.84 s/step
+2026-09-15 17:15:15,694 INFO step  1725/1800  loss 0.6774  lr 1.00e-04  peak VRAM 1.69 GiB  0.84 s/step
+2026-09-15 17:15:35,513 INFO step  1750/1800  loss 0.6588  lr 1.00e-04  peak VRAM 1.69 GiB  0.84 s/step
+2026-09-15 17:15:55,118 INFO step  1775/1800  loss 0.6696  lr 1.00e-04  peak VRAM 1.69 GiB  0.84 s/step
+2026-09-15 17:16:14,605 INFO step  1800/1800  loss 0.6648  lr 1.00e-04  peak VRAM 1.69 GiB  0.84 s/step
+2026-09-15 17:16:33,096 INFO step  1800  val loss 0.7893
+2026-09-15 17:16:33,511 INFO saved adapter to C:\Users\Syauqi Nabil\Robotics\testing-SmolVLA\results\phase-4\20260915-165042\checkpoint-final (2.9 MiB)

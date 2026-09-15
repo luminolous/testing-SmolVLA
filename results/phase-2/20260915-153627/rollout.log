@@ -1,0 +1,88 @@
+2026-09-15 15:36:35,820 INFO httpx: HTTP Request: HEAD https://huggingface.co/lerobot/smolvla_base/resolve/main/config.json "HTTP/1.1 307 Temporary Redirect"
+2026-09-15 15:36:35,856 INFO httpx: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/lerobot/smolvla_base/c83c3163b8ca9b7e67c509fffd9121e66cb96205/config.json?%2Flerobot%2Fsmolvla_base%2Fresolve%2Fmain%2Fconfig.json=&etag=%2236d4d51c1b01be11b2c7a074ab34bf5ee6db9021%22 "HTTP/1.1 200 OK"
+2026-09-15 15:36:36,197 INFO httpx: HTTP Request: HEAD https://huggingface.co/HuggingFaceTB/SmolVLM2-500M-Video-Instruct/resolve/main/config.json "HTTP/1.1 307 Temporary Redirect"
+2026-09-15 15:36:36,234 INFO httpx: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/HuggingFaceTB/SmolVLM2-500M-Video-Instruct/7b375e1b73b11138ff12fe22c8f2822d8fe03467/config.json?%2FHuggingFaceTB%2FSmolVLM2-500M-Video-Instruct%2Fresolve%2Fmain%2Fconfig.json=&etag=%222463e842695989a207176fdb249327a494b05cfb%22 "HTTP/1.1 200 OK"
+2026-09-15 15:36:37,882 INFO httpx: HTTP Request: HEAD https://huggingface.co/HuggingFaceTB/SmolVLM2-500M-Video-Instruct/resolve/main/generation_config.json "HTTP/1.1 307 Temporary Redirect"
+2026-09-15 15:36:37,904 INFO httpx: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/HuggingFaceTB/SmolVLM2-500M-Video-Instruct/7b375e1b73b11138ff12fe22c8f2822d8fe03467/generation_config.json?%2FHuggingFaceTB%2FSmolVLM2-500M-Video-Instruct%2Fresolve%2Fmain%2Fgeneration_config.json=&etag=%22eace9aa6d392fd94dbe0c90825074c53fd7ecd4a%22 "HTTP/1.1 200 OK"
+2026-09-15 15:36:38,196 INFO httpx: HTTP Request: HEAD https://huggingface.co/HuggingFaceTB/SmolVLM2-500M-Video-Instruct/resolve/main/processor_config.json "HTTP/1.1 307 Temporary Redirect"
+2026-09-15 15:36:38,221 INFO httpx: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/HuggingFaceTB/SmolVLM2-500M-Video-Instruct/7b375e1b73b11138ff12fe22c8f2822d8fe03467/processor_config.json?%2FHuggingFaceTB%2FSmolVLM2-500M-Video-Instruct%2Fresolve%2Fmain%2Fprocessor_config.json=&etag=%2283df8c48da1f41e1a9129a4bc2aba000eb2b529f%22 "HTTP/1.1 200 OK"
+2026-09-15 15:36:38,524 INFO httpx: HTTP Request: GET https://huggingface.co/api/models/HuggingFaceTB/SmolVLM2-500M-Video-Instruct/tree/main/additional_chat_templates?recursive=false&expand=false "HTTP/1.1 404 Not Found"
+2026-09-15 15:36:38,820 INFO httpx: HTTP Request: HEAD https://huggingface.co/HuggingFaceTB/SmolVLM2-500M-Video-Instruct/resolve/main/processor_config.json "HTTP/1.1 307 Temporary Redirect"
+2026-09-15 15:36:38,846 INFO httpx: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/HuggingFaceTB/SmolVLM2-500M-Video-Instruct/7b375e1b73b11138ff12fe22c8f2822d8fe03467/processor_config.json?%2FHuggingFaceTB%2FSmolVLM2-500M-Video-Instruct%2Fresolve%2Fmain%2Fprocessor_config.json=&etag=%2283df8c48da1f41e1a9129a4bc2aba000eb2b529f%22 "HTTP/1.1 200 OK"
+2026-09-15 15:36:39,151 INFO httpx: HTTP Request: HEAD https://huggingface.co/HuggingFaceTB/SmolVLM2-500M-Video-Instruct/resolve/main/chat_template.json "HTTP/1.1 307 Temporary Redirect"
+2026-09-15 15:36:39,171 INFO httpx: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/HuggingFaceTB/SmolVLM2-500M-Video-Instruct/7b375e1b73b11138ff12fe22c8f2822d8fe03467/chat_template.json?%2FHuggingFaceTB%2FSmolVLM2-500M-Video-Instruct%2Fresolve%2Fmain%2Fchat_template.json=&etag=%221d342e4f070c962a14ba4ece4e06212bc70d8e36%22 "HTTP/1.1 200 OK"
+2026-09-15 15:36:39,473 INFO httpx: HTTP Request: HEAD https://huggingface.co/HuggingFaceTB/SmolVLM2-500M-Video-Instruct/resolve/main/chat_template.jinja "HTTP/1.1 404 Not Found"
+2026-09-15 15:36:39,787 INFO httpx: HTTP Request: HEAD https://huggingface.co/HuggingFaceTB/SmolVLM2-500M-Video-Instruct/resolve/main/audio_tokenizer_config.json "HTTP/1.1 404 Not Found"
+2026-09-15 15:36:40,169 INFO httpx: HTTP Request: GET https://huggingface.co/api/models/HuggingFaceTB/SmolVLM2-500M-Video-Instruct/tree/main/additional_chat_templates?recursive=false&expand=false "HTTP/1.1 404 Not Found"
+2026-09-15 15:36:40,457 INFO httpx: HTTP Request: HEAD https://huggingface.co/HuggingFaceTB/SmolVLM2-500M-Video-Instruct/resolve/main/processor_config.json "HTTP/1.1 307 Temporary Redirect"
+2026-09-15 15:36:40,481 INFO httpx: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/HuggingFaceTB/SmolVLM2-500M-Video-Instruct/7b375e1b73b11138ff12fe22c8f2822d8fe03467/processor_config.json?%2FHuggingFaceTB%2FSmolVLM2-500M-Video-Instruct%2Fresolve%2Fmain%2Fprocessor_config.json=&etag=%2283df8c48da1f41e1a9129a4bc2aba000eb2b529f%22 "HTTP/1.1 200 OK"
+2026-09-15 15:36:40,760 INFO httpx: HTTP Request: HEAD https://huggingface.co/HuggingFaceTB/SmolVLM2-500M-Video-Instruct/resolve/main/chat_template.json "HTTP/1.1 307 Temporary Redirect"
+2026-09-15 15:36:40,783 INFO httpx: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/HuggingFaceTB/SmolVLM2-500M-Video-Instruct/7b375e1b73b11138ff12fe22c8f2822d8fe03467/chat_template.json?%2FHuggingFaceTB%2FSmolVLM2-500M-Video-Instruct%2Fresolve%2Fmain%2Fchat_template.json=&etag=%221d342e4f070c962a14ba4ece4e06212bc70d8e36%22 "HTTP/1.1 200 OK"
+2026-09-15 15:36:41,092 INFO httpx: HTTP Request: HEAD https://huggingface.co/HuggingFaceTB/SmolVLM2-500M-Video-Instruct/resolve/main/chat_template.jinja "HTTP/1.1 404 Not Found"
+2026-09-15 15:36:41,385 INFO httpx: HTTP Request: HEAD https://huggingface.co/HuggingFaceTB/SmolVLM2-500M-Video-Instruct/resolve/main/audio_tokenizer_config.json "HTTP/1.1 404 Not Found"
+2026-09-15 15:36:41,705 INFO httpx: HTTP Request: HEAD https://huggingface.co/HuggingFaceTB/SmolVLM2-500M-Video-Instruct/resolve/main/processor_config.json "HTTP/1.1 307 Temporary Redirect"
+2026-09-15 15:36:41,726 INFO httpx: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/HuggingFaceTB/SmolVLM2-500M-Video-Instruct/7b375e1b73b11138ff12fe22c8f2822d8fe03467/processor_config.json?%2FHuggingFaceTB%2FSmolVLM2-500M-Video-Instruct%2Fresolve%2Fmain%2Fprocessor_config.json=&etag=%2283df8c48da1f41e1a9129a4bc2aba000eb2b529f%22 "HTTP/1.1 200 OK"
+2026-09-15 15:36:42,031 INFO httpx: HTTP Request: HEAD https://huggingface.co/HuggingFaceTB/SmolVLM2-500M-Video-Instruct/resolve/main/preprocessor_config.json "HTTP/1.1 307 Temporary Redirect"
+2026-09-15 15:36:42,053 INFO httpx: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/HuggingFaceTB/SmolVLM2-500M-Video-Instruct/7b375e1b73b11138ff12fe22c8f2822d8fe03467/preprocessor_config.json?%2FHuggingFaceTB%2FSmolVLM2-500M-Video-Instruct%2Fresolve%2Fmain%2Fpreprocessor_config.json=&etag=%22bf7669a38692ad141d333db3be18bd55cb6e2c59%22 "HTTP/1.1 200 OK"
+2026-09-15 15:36:42,343 INFO httpx: HTTP Request: HEAD https://huggingface.co/HuggingFaceTB/SmolVLM2-500M-Video-Instruct/resolve/main/processor_config.json "HTTP/1.1 307 Temporary Redirect"
+2026-09-15 15:36:42,367 INFO httpx: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/HuggingFaceTB/SmolVLM2-500M-Video-Instruct/7b375e1b73b11138ff12fe22c8f2822d8fe03467/processor_config.json?%2FHuggingFaceTB%2FSmolVLM2-500M-Video-Instruct%2Fresolve%2Fmain%2Fprocessor_config.json=&etag=%2283df8c48da1f41e1a9129a4bc2aba000eb2b529f%22 "HTTP/1.1 200 OK"
+2026-09-15 15:36:42,665 INFO httpx: HTTP Request: HEAD https://huggingface.co/HuggingFaceTB/SmolVLM2-500M-Video-Instruct/resolve/main/preprocessor_config.json "HTTP/1.1 307 Temporary Redirect"
+2026-09-15 15:36:42,688 INFO httpx: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/HuggingFaceTB/SmolVLM2-500M-Video-Instruct/7b375e1b73b11138ff12fe22c8f2822d8fe03467/preprocessor_config.json?%2FHuggingFaceTB%2FSmolVLM2-500M-Video-Instruct%2Fresolve%2Fmain%2Fpreprocessor_config.json=&etag=%22bf7669a38692ad141d333db3be18bd55cb6e2c59%22 "HTTP/1.1 200 OK"
+2026-09-15 15:36:42,976 INFO httpx: HTTP Request: HEAD https://huggingface.co/HuggingFaceTB/SmolVLM2-500M-Video-Instruct/resolve/main/config.json "HTTP/1.1 307 Temporary Redirect"
+2026-09-15 15:36:42,998 INFO httpx: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/HuggingFaceTB/SmolVLM2-500M-Video-Instruct/7b375e1b73b11138ff12fe22c8f2822d8fe03467/config.json?%2FHuggingFaceTB%2FSmolVLM2-500M-Video-Instruct%2Fresolve%2Fmain%2Fconfig.json=&etag=%222463e842695989a207176fdb249327a494b05cfb%22 "HTTP/1.1 200 OK"
+2026-09-15 15:36:43,311 INFO httpx: HTTP Request: HEAD https://huggingface.co/HuggingFaceTB/SmolVLM2-500M-Video-Instruct/resolve/main/tokenizer_config.json "HTTP/1.1 307 Temporary Redirect"
+2026-09-15 15:36:43,345 INFO httpx: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/HuggingFaceTB/SmolVLM2-500M-Video-Instruct/7b375e1b73b11138ff12fe22c8f2822d8fe03467/tokenizer_config.json?%2FHuggingFaceTB%2FSmolVLM2-500M-Video-Instruct%2Fresolve%2Fmain%2Ftokenizer_config.json=&etag=%22e4042a1126290fdb96ece2a4ad8dd7108c5de484%22 "HTTP/1.1 200 OK"
+2026-09-15 15:36:43,667 INFO httpx: HTTP Request: GET https://huggingface.co/api/models/HuggingFaceTB/SmolVLM2-500M-Video-Instruct/tree/main/additional_chat_templates?recursive=false&expand=false "HTTP/1.1 404 Not Found"
+2026-09-15 15:36:44,042 INFO httpx: HTTP Request: GET https://huggingface.co/api/models/HuggingFaceTB/SmolVLM2-500M-Video-Instruct/tree/main?recursive=true&expand=false "HTTP/1.1 200 OK"
+2026-09-15 15:36:44,472 INFO httpx: HTTP Request: HEAD https://huggingface.co/HuggingFaceTB/SmolVLM2-500M-Video-Instruct/resolve/main/processor_config.json "HTTP/1.1 307 Temporary Redirect"
+2026-09-15 15:36:44,503 INFO httpx: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/HuggingFaceTB/SmolVLM2-500M-Video-Instruct/7b375e1b73b11138ff12fe22c8f2822d8fe03467/processor_config.json?%2FHuggingFaceTB%2FSmolVLM2-500M-Video-Instruct%2Fresolve%2Fmain%2Fprocessor_config.json=&etag=%2283df8c48da1f41e1a9129a4bc2aba000eb2b529f%22 "HTTP/1.1 200 OK"
+2026-09-15 15:36:44,811 INFO httpx: HTTP Request: HEAD https://huggingface.co/HuggingFaceTB/SmolVLM2-500M-Video-Instruct/resolve/main/video_preprocessor_config.json "HTTP/1.1 404 Not Found"
+2026-09-15 15:36:45,105 INFO httpx: HTTP Request: HEAD https://huggingface.co/HuggingFaceTB/SmolVLM2-500M-Video-Instruct/resolve/main/preprocessor_config.json "HTTP/1.1 307 Temporary Redirect"
+2026-09-15 15:36:45,133 INFO httpx: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/HuggingFaceTB/SmolVLM2-500M-Video-Instruct/7b375e1b73b11138ff12fe22c8f2822d8fe03467/preprocessor_config.json?%2FHuggingFaceTB%2FSmolVLM2-500M-Video-Instruct%2Fresolve%2Fmain%2Fpreprocessor_config.json=&etag=%22bf7669a38692ad141d333db3be18bd55cb6e2c59%22 "HTTP/1.1 200 OK"
+2026-09-15 15:36:45,483 INFO httpx: HTTP Request: HEAD https://huggingface.co/HuggingFaceTB/SmolVLM2-500M-Video-Instruct/resolve/main/processor_config.json "HTTP/1.1 307 Temporary Redirect"
+2026-09-15 15:36:45,585 INFO httpx: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/HuggingFaceTB/SmolVLM2-500M-Video-Instruct/7b375e1b73b11138ff12fe22c8f2822d8fe03467/processor_config.json?%2FHuggingFaceTB%2FSmolVLM2-500M-Video-Instruct%2Fresolve%2Fmain%2Fprocessor_config.json=&etag=%2283df8c48da1f41e1a9129a4bc2aba000eb2b529f%22 "HTTP/1.1 200 OK"
+2026-09-15 15:36:45,905 INFO httpx: HTTP Request: HEAD https://huggingface.co/HuggingFaceTB/SmolVLM2-500M-Video-Instruct/resolve/main/video_preprocessor_config.json "HTTP/1.1 404 Not Found"
+2026-09-15 15:36:46,208 INFO httpx: HTTP Request: HEAD https://huggingface.co/HuggingFaceTB/SmolVLM2-500M-Video-Instruct/resolve/main/preprocessor_config.json "HTTP/1.1 307 Temporary Redirect"
+2026-09-15 15:36:46,232 INFO httpx: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/HuggingFaceTB/SmolVLM2-500M-Video-Instruct/7b375e1b73b11138ff12fe22c8f2822d8fe03467/preprocessor_config.json?%2FHuggingFaceTB%2FSmolVLM2-500M-Video-Instruct%2Fresolve%2Fmain%2Fpreprocessor_config.json=&etag=%22bf7669a38692ad141d333db3be18bd55cb6e2c59%22 "HTTP/1.1 200 OK"
+2026-09-15 15:36:53,599 INFO httpx: HTTP Request: HEAD https://huggingface.co/lerobot/smolvla_base/resolve/main/model.safetensors "HTTP/1.1 302 Found"
+2026-09-15 15:36:56,231 INFO httpx: HTTP Request: HEAD https://huggingface.co/lerobot/smolvla_base/resolve/main/policy_preprocessor.json "HTTP/1.1 307 Temporary Redirect"
+2026-09-15 15:36:56,254 INFO httpx: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/lerobot/smolvla_base/c83c3163b8ca9b7e67c509fffd9121e66cb96205/policy_preprocessor.json?%2Flerobot%2Fsmolvla_base%2Fresolve%2Fmain%2Fpolicy_preprocessor.json=&etag=%224df8f7cbce54095074f9cf31b663e5af5c006f85%22 "HTTP/1.1 200 OK"
+2026-09-15 15:36:56,535 INFO httpx: HTTP Request: HEAD https://huggingface.co/HuggingFaceTB/SmolVLM2-500M-Video-Instruct/resolve/main/config.json "HTTP/1.1 307 Temporary Redirect"
+2026-09-15 15:36:56,555 INFO httpx: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/HuggingFaceTB/SmolVLM2-500M-Video-Instruct/7b375e1b73b11138ff12fe22c8f2822d8fe03467/config.json?%2FHuggingFaceTB%2FSmolVLM2-500M-Video-Instruct%2Fresolve%2Fmain%2Fconfig.json=&etag=%222463e842695989a207176fdb249327a494b05cfb%22 "HTTP/1.1 200 OK"
+2026-09-15 15:36:56,858 INFO httpx: HTTP Request: HEAD https://huggingface.co/HuggingFaceTB/SmolVLM2-500M-Video-Instruct/resolve/main/tokenizer_config.json "HTTP/1.1 307 Temporary Redirect"
+2026-09-15 15:36:56,880 INFO httpx: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/HuggingFaceTB/SmolVLM2-500M-Video-Instruct/7b375e1b73b11138ff12fe22c8f2822d8fe03467/tokenizer_config.json?%2FHuggingFaceTB%2FSmolVLM2-500M-Video-Instruct%2Fresolve%2Fmain%2Ftokenizer_config.json=&etag=%22e4042a1126290fdb96ece2a4ad8dd7108c5de484%22 "HTTP/1.1 200 OK"
+2026-09-15 15:36:57,195 INFO httpx: HTTP Request: GET https://huggingface.co/api/models/HuggingFaceTB/SmolVLM2-500M-Video-Instruct/tree/main/additional_chat_templates?recursive=false&expand=false "HTTP/1.1 404 Not Found"
+2026-09-15 15:36:57,483 INFO httpx: HTTP Request: GET https://huggingface.co/api/models/HuggingFaceTB/SmolVLM2-500M-Video-Instruct/tree/main?recursive=true&expand=false "HTTP/1.1 200 OK"
+2026-09-15 15:36:58,007 INFO httpx: HTTP Request: HEAD https://huggingface.co/lerobot/smolvla_base/resolve/main/policy_postprocessor.json "HTTP/1.1 307 Temporary Redirect"
+2026-09-15 15:36:58,030 INFO httpx: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/lerobot/smolvla_base/c83c3163b8ca9b7e67c509fffd9121e66cb96205/policy_postprocessor.json?%2Flerobot%2Fsmolvla_base%2Fresolve%2Fmain%2Fpolicy_postprocessor.json=&etag=%226f8997e5be18c67bad9377dd2cd9622ba38b5ae3%22 "HTTP/1.1 200 OK"
+2026-09-15 15:36:58,043 WARNING src.model.smolvla_wrapper: postprocessor has no stats bound to the 'action' key: predicted actions are in NORMALISED units. Pass dataset_stats_key='so100' to bind one of the stored statistic sets.
+2026-09-15 15:36:59,793 INFO rollout: action mapping:
+action space in : normalized
+model dim -> robosuite dim (OSC_POSE)
+    0 -> 0 (dx)    ARBITRARY
+    1 -> 1 (dy)    ARBITRARY
+    2 -> 2 (dz)    ARBITRARY
+    3 -> 3 (drx)    ARBITRARY
+    4 -> 4 (dry)    ARBITRARY
+    - -> 5 (drz)   held at 0, no counterpart
+    5 -> 6 (gripper)  the one real correspondence
+2026-09-15 15:37:04,981 INFO rollout: episode   0  success=False len=200    5.2s  peak VRAM 1.75 GiB
+2026-09-15 15:37:09,044 INFO rollout: episode   1  success=False len=200    4.1s  peak VRAM 1.75 GiB
+2026-09-15 15:37:13,200 INFO rollout: episode   2  success=False len=200    4.2s  peak VRAM 1.75 GiB
+2026-09-15 15:37:17,284 INFO rollout: episode   3  success=False len=200    4.1s  peak VRAM 1.75 GiB
+2026-09-15 15:37:21,344 INFO rollout: episode   4  success=False len=200    4.1s  peak VRAM 1.75 GiB
+2026-09-15 15:37:25,397 INFO rollout: episode   5  success=False len=200    4.1s  peak VRAM 1.75 GiB
+2026-09-15 15:37:29,545 INFO rollout: episode   6  success=False len=200    4.1s  peak VRAM 1.75 GiB
+2026-09-15 15:37:33,632 INFO rollout: episode   7  success=False len=200    4.1s  peak VRAM 1.75 GiB
+2026-09-15 15:37:37,622 INFO rollout: episode   8  success=False len=200    4.0s  peak VRAM 1.75 GiB
+2026-09-15 15:37:41,705 INFO rollout: episode   9  success=False len=200    4.1s  peak VRAM 1.75 GiB
+2026-09-15 15:37:45,840 INFO rollout: episode  10  success=False len=200    4.1s  peak VRAM 1.75 GiB
+2026-09-15 15:37:49,793 INFO rollout: episode  11  success=False len=200    4.0s  peak VRAM 1.75 GiB
+2026-09-15 15:37:53,881 INFO rollout: episode  12  success=False len=200    4.1s  peak VRAM 1.75 GiB
+2026-09-15 15:37:57,916 INFO rollout: episode  13  success=False len=200    4.0s  peak VRAM 1.75 GiB
+2026-09-15 15:38:01,997 INFO rollout: episode  14  success=False len=200    4.1s  peak VRAM 1.75 GiB
+2026-09-15 15:38:06,138 INFO rollout: episode  15  success=False len=200    4.1s  peak VRAM 1.75 GiB
+2026-09-15 15:38:10,247 INFO rollout: episode  16  success=False len=200    4.1s  peak VRAM 1.75 GiB
+2026-09-15 15:38:14,292 INFO rollout: episode  17  success=False len=200    4.0s  peak VRAM 1.75 GiB
+2026-09-15 15:38:18,278 INFO rollout: episode  18  success=False len=200    4.0s  peak VRAM 1.75 GiB
+2026-09-15 15:38:22,428 INFO rollout: episode  19  success=False len=200    4.2s  peak VRAM 1.75 GiB

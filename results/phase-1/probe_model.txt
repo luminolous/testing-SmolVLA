@@ -1,0 +1,306 @@
+# Phase 1 raw probe output   (2026-09-15 14:25)
+
+### RUN 1: as shipped (float32 weights, no autocast), 50 iters
+
+==============================================================================
+1.1  CHECKPOINT LOAD
+==============================================================================
+checkpoint            : lerobot/smolvla_base
+device                : cuda
+weight dtype          : float32 (forced -- modeling_smolvla.py:808)
+compute dtype         : none via torch.autocast
+stats key             : <none, as shipped>
+Loading  HuggingFaceTB/SmolVLM2-500M-Video-Instruct weights ...
+WARNING src.model.smolvla_wrapper: postprocessor has no stats bound to the 'action' key: predicted actions are in NORMALISED units. Pass dataset_stats_key='so100' to bind one of the stored statistic sets.
+
+load time             : 20.72 s
+parameters            : 450.0 M (99.9 M trainable)
+weight bytes          : 1.677 GiB
+VRAM after load       : 1.766 GiB
+
+==============================================================================
+1.2  INPUT CONTRACT
+==============================================================================
+cameras expected      : 3
+    observation.images.camera1
+    observation.images.camera2
+    observation.images.camera3
+declared image shape  : (C=3, H=256, W=256)   [config.json input_features]
+resized with padding  : (512, 512)  [config.resize_imgs_with_padding]
+pixel range in        : [0, 1] float, rescaled to [-1, 1] for SigLIP  [modeling_smolvla.py:360]
+state dim             : 6  (padded to max_state_dim=32) [modeling_smolvla.py:412]
+state normalisation   : NormalizationMode.MEAN_STD
+observation steps     : n_obs_steps=1
+language key          : 'task'  [policy_preprocessor.json step 3]
+tokenizer             : HuggingFaceTB/SmolVLM2-500M-Video-Instruct
+tokenizer max length  : 48, padding=max_length, truncation=True
+
+==============================================================================
+1.3  OUTPUT CONTRACT
+==============================================================================
+action dim            : 6  (padded to max_action_dim=32 internally, then sliced back)
+chunked               : YES -- chunk_size=50, n_action_steps=50
+execution strategy    : select_action() caches the chunk and pops one action per call;
+                        the network runs once every 50 calls  [modeling_smolvla.py:262-269]
+decoding              : flow matching, num_steps=10
+action normalisation  : NormalizationMode.MEAN_STD (declared in config)
+
+statistics stored in checkpoint (3 key(s)):
+    so100-blue.buffer.action
+        mean [   1.42  125.72  125.42   63.78 -106.54    3.35]
+        std  [14.08 39.43 18.24 23.49 38.11  5.05]
+    so100-red.buffer.action
+        mean [   2.44  124.94  123.56   66.99 -103.88    2.89]
+        std  [14.3  42.77 18.88 21.65 33.53  4.48]
+    so100.buffer.action
+        mean [  1.6  119.94 109.77  56.71 -27.42  12.  ]
+        std  [26.39 52.41 49.85 37.   59.36 19.04]
+
+unnormalisation active: False
+    ^ actions are returned in NORMALISED units.
+      The checkpoint stores stats under dataset-qualified keys
+      ('so100.buffer.action'), the unnormalizer looks up the bare key
+      'action', the lookup misses, and normalize_processor.py:330
+      returns the tensor untouched -- silently, with no warning.
+      Bind one explicitly with --stats-key so100
+
+==============================================================================
+1.4  DUMMY FORWARD PASS
+==============================================================================
+output shape          : (50, 6)  (chunk_size, action_dim)
+output dtype          : float32
+NaNs                  : 0
+Infs                  : 0
+value range           : [-2.9605, 1.3773]
+mean / std            : -0.2962 / 0.8324
+
+per-dimension over 5 random observations (first timestep of each chunk):
+    dim 0: mean= -0.4417  std=  0.7535  range=[ -1.1866,  +0.8802]
+    dim 1: mean= -0.2438  std=  0.6960  range=[ -1.1338,  +0.8814]
+    dim 2: mean= -0.0439  std=  1.2008  range=[ -1.5759,  +1.3635]
+    dim 3: mean= -0.4210  std=  1.0938  range=[ -2.3925,  +0.5943]
+    dim 4: mean= -0.4494  std=  0.8651  range=[ -1.9045,  +0.5866]
+    dim 5: mean= -0.4548  std=  0.2230  range=[ -0.7393,  -0.1143]
+
+sensitivity to input  : varies with input (mean per-dim std 0.805374)
+
+==============================================================================
+1.5  LATENCY AND MEMORY
+==============================================================================
+iterations            : 50 (after 5 warmup), batch size 1
+mean                  : 399.71 ms
+p95                   : 410.97 ms
+min / max             : 379.93 / 437.12 ms
+drift (2nd - 1st half): -2.85 ms  (stable)
+
+per single action     : 7.99 ms amortised over a 50-step chunk
+published expectation : sub-100 ms per call
+verdict               : ABOVE the published figure
+
+peak VRAM allocated   : 1.756 GiB
+peak VRAM reserved    : 1.828 GiB
+device VRAM in use    : 2.894 GiB of 6.00 GiB
+budget                : 5.0 GiB -> within budget
+
+
+### RUN 2: --stats-key so100 (unnormalisation bound), 10 iters
+
+==============================================================================
+1.1  CHECKPOINT LOAD
+==============================================================================
+checkpoint            : lerobot/smolvla_base
+device                : cuda
+weight dtype          : float32 (forced -- modeling_smolvla.py:808)
+compute dtype         : none via torch.autocast
+stats key             : so100
+Loading  HuggingFaceTB/SmolVLM2-500M-Video-Instruct weights ...
+
+load time             : 20.77 s
+parameters            : 450.0 M (99.9 M trainable)
+weight bytes          : 1.677 GiB
+VRAM after load       : 1.766 GiB
+
+==============================================================================
+1.2  INPUT CONTRACT
+==============================================================================
+cameras expected      : 3
+    observation.images.camera1
+    observation.images.camera2
+    observation.images.camera3
+declared image shape  : (C=3, H=256, W=256)   [config.json input_features]
+resized with padding  : (512, 512)  [config.resize_imgs_with_padding]
+pixel range in        : [0, 1] float, rescaled to [-1, 1] for SigLIP  [modeling_smolvla.py:360]
+state dim             : 6  (padded to max_state_dim=32) [modeling_smolvla.py:412]
+state normalisation   : NormalizationMode.MEAN_STD
+observation steps     : n_obs_steps=1
+language key          : 'task'  [policy_preprocessor.json step 3]
+tokenizer             : HuggingFaceTB/SmolVLM2-500M-Video-Instruct
+tokenizer max length  : 48, padding=max_length, truncation=True
+
+==============================================================================
+1.3  OUTPUT CONTRACT
+==============================================================================
+action dim            : 6  (padded to max_action_dim=32 internally, then sliced back)
+chunked               : YES -- chunk_size=50, n_action_steps=50
+execution strategy    : select_action() caches the chunk and pops one action per call;
+                        the network runs once every 50 calls  [modeling_smolvla.py:262-269]
+decoding              : flow matching, num_steps=10
+action normalisation  : NormalizationMode.MEAN_STD (declared in config)
+
+statistics stored in checkpoint (4 key(s)):
+    action
+        mean [  1.6  119.94 109.77  56.71 -27.42  12.  ]
+        std  [26.39 52.41 49.85 37.   59.36 19.04]
+    so100-blue.buffer.action
+        mean [   1.42  125.72  125.42   63.78 -106.54    3.35]
+        std  [14.08 39.43 18.24 23.49 38.11  5.05]
+    so100-red.buffer.action
+        mean [   2.44  124.94  123.56   66.99 -103.88    2.89]
+        std  [14.3  42.77 18.88 21.65 33.53  4.48]
+    so100.buffer.action
+        mean [  1.6  119.94 109.77  56.71 -27.42  12.  ]
+        std  [26.39 52.41 49.85 37.   59.36 19.04]
+
+unnormalisation active: True
+
+==============================================================================
+1.4  DUMMY FORWARD PASS
+==============================================================================
+output shape          : (50, 6)  (chunk_size, action_dim)
+output dtype          : float32
+NaNs                  : 0
+Infs                  : 0
+value range           : [-152.2963, 178.4324]
+mean / std            : 35.1802 / 70.7431
+
+per-dimension over 5 random observations (first timestep of each chunk):
+    dim 0: mean=-10.0619  std= 19.8859  range=[-29.7213, +24.8257]
+    dim 1: mean=+107.1676  std= 36.4783  range=[+60.5212, +166.1397]
+    dim 2: mean=+107.5823  std= 59.8666  range=[+31.2031, +177.7445]
+    dim 3: mean=+41.1307  std= 40.4675  range=[-31.8111, +78.6936]
+    dim 4: mean=-54.1007  std= 51.3546  range=[-140.4708,  +7.3984]
+    dim 5: mean= +3.3427  std=  4.2461  range=[ -2.0739,  +9.8263]
+
+sensitivity to input  : varies with input (mean per-dim std 35.383163)
+
+==============================================================================
+1.5  LATENCY AND MEMORY
+==============================================================================
+iterations            : 10 (after 5 warmup), batch size 1
+mean                  : 398.91 ms
+p95                   : 408.99 ms
+min / max             : 385.95 / 411.26 ms
+drift (2nd - 1st half): +1.25 ms  (stable)
+
+per single action     : 7.98 ms amortised over a 50-step chunk
+published expectation : sub-100 ms per call
+verdict               : ABOVE the published figure
+
+peak VRAM allocated   : 1.756 GiB
+peak VRAM reserved    : 1.828 GiB
+device VRAM in use    : 2.894 GiB of 6.00 GiB
+budget                : 5.0 GiB -> within budget
+
+
+### RUN 3: --autocast bfloat16, 10 iters
+
+==============================================================================
+1.1  CHECKPOINT LOAD
+==============================================================================
+checkpoint            : lerobot/smolvla_base
+device                : cuda
+weight dtype          : float32 (forced -- modeling_smolvla.py:808)
+compute dtype         : bfloat16 via torch.autocast
+stats key             : <none, as shipped>
+Loading  HuggingFaceTB/SmolVLM2-500M-Video-Instruct weights ...
+WARNING src.model.smolvla_wrapper: postprocessor has no stats bound to the 'action' key: predicted actions are in NORMALISED units. Pass dataset_stats_key='so100' to bind one of the stored statistic sets.
+
+load time             : 20.62 s
+parameters            : 450.0 M (99.9 M trainable)
+weight bytes          : 1.677 GiB
+VRAM after load       : 1.766 GiB
+
+==============================================================================
+1.2  INPUT CONTRACT
+==============================================================================
+cameras expected      : 3
+    observation.images.camera1
+    observation.images.camera2
+    observation.images.camera3
+declared image shape  : (C=3, H=256, W=256)   [config.json input_features]
+resized with padding  : (512, 512)  [config.resize_imgs_with_padding]
+pixel range in        : [0, 1] float, rescaled to [-1, 1] for SigLIP  [modeling_smolvla.py:360]
+state dim             : 6  (padded to max_state_dim=32) [modeling_smolvla.py:412]
+state normalisation   : NormalizationMode.MEAN_STD
+observation steps     : n_obs_steps=1
+language key          : 'task'  [policy_preprocessor.json step 3]
+tokenizer             : HuggingFaceTB/SmolVLM2-500M-Video-Instruct
+tokenizer max length  : 48, padding=max_length, truncation=True
+
+==============================================================================
+1.3  OUTPUT CONTRACT
+==============================================================================
+action dim            : 6  (padded to max_action_dim=32 internally, then sliced back)
+chunked               : YES -- chunk_size=50, n_action_steps=50
+execution strategy    : select_action() caches the chunk and pops one action per call;
+                        the network runs once every 50 calls  [modeling_smolvla.py:262-269]
+decoding              : flow matching, num_steps=10
+action normalisation  : NormalizationMode.MEAN_STD (declared in config)
+
+statistics stored in checkpoint (3 key(s)):
+    so100-blue.buffer.action
+        mean [   1.42  125.72  125.42   63.78 -106.54    3.35]
+        std  [14.08 39.43 18.24 23.49 38.11  5.05]
+    so100-red.buffer.action
+        mean [   2.44  124.94  123.56   66.99 -103.88    2.89]
+        std  [14.3  42.77 18.88 21.65 33.53  4.48]
+    so100.buffer.action
+        mean [  1.6  119.94 109.77  56.71 -27.42  12.  ]
+        std  [26.39 52.41 49.85 37.   59.36 19.04]
+
+unnormalisation active: False
+    ^ actions are returned in NORMALISED units.
+      The checkpoint stores stats under dataset-qualified keys
+      ('so100.buffer.action'), the unnormalizer looks up the bare key
+      'action', the lookup misses, and normalize_processor.py:330
+      returns the tensor untouched -- silently, with no warning.
+      Bind one explicitly with --stats-key so100
+
+==============================================================================
+1.4  DUMMY FORWARD PASS
+==============================================================================
+output shape          : (50, 6)  (chunk_size, action_dim)
+output dtype          : float32
+NaNs                  : 0
+Infs                  : 0
+value range           : [-2.9479, 1.3847]
+mean / std            : -0.2933 / 0.8315
+
+per-dimension over 5 random observations (first timestep of each chunk):
+    dim 0: mean= -0.4425  std=  0.7527  range=[ -1.1849,  +0.8751]
+    dim 1: mean= -0.2429  std=  0.6932  range=[ -1.1316,  +0.8745]
+    dim 2: mean= -0.0408  std=  1.2035  range=[ -1.5799,  +1.3737]
+    dim 3: mean= -0.4211  std=  1.0916  range=[ -2.3880,  +0.5937]
+    dim 4: mean= -0.4493  std=  0.8637  range=[ -1.9021,  +0.5864]
+    dim 5: mean= -0.4534  std=  0.2245  range=[ -0.7397,  -0.1116]
+
+sensitivity to input  : varies with input (mean per-dim std 0.804851)
+
+==============================================================================
+1.5  LATENCY AND MEMORY
+==============================================================================
+iterations            : 10 (after 5 warmup), batch size 1
+mean                  : 401.39 ms
+p95                   : 422.50 ms
+min / max             : 388.08 / 430.05 ms
+drift (2nd - 1st half): +4.25 ms  (stable)
+
+per single action     : 8.03 ms amortised over a 50-step chunk
+published expectation : sub-100 ms per call
+verdict               : ABOVE the published figure
+
+peak VRAM allocated   : 1.927 GiB
+peak VRAM reserved    : 1.949 GiB
+device VRAM in use    : 3.021 GiB of 6.00 GiB
+budget                : 5.0 GiB -> within budget
+

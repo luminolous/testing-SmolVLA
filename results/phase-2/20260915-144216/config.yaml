@@ -1,0 +1,23 @@
+env:
+  name: Lift
+  robot: Panda
+  controller: OSC_POSE
+  control_freq: 20
+  horizon: 40
+  cameras:
+  - robot0_eye_in_hand
+  - agentview
+  resolution: 256
+model:
+  checkpoint: lerobot/smolvla_base
+  device: cuda
+  instruction: lift the cube
+  dataset_stats_key: null
+  autocast: none
+  n_action_steps: 50
+rollout:
+  n_episodes: 14
+  seed: 0
+  action_space: normalized
+  normalize_state: true
+  save_frames_every: 0

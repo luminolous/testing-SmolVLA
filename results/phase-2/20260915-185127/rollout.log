@@ -1,0 +1,25 @@
+2026-09-15 18:51:55,296 INFO merged LoRA adapter from results\phase-4\20260915-174932\checkpoint-4000
+2026-09-15 18:51:58,720 INFO action mapping:
+action space in : normalized
+identity mapping -- the policy emits robosuite's 7 dimensions directly (dx, dy, dz, drx, dry, drz, gripper).
+No arbitrary correspondence is involved; values are clipped to [-1, 1] and passed through.
+2026-09-15 18:52:04,148 INFO episode   0  success=True  len=200    5.4s  peak VRAM 0.90 GiB
+2026-09-15 18:52:08,333 INFO episode   1  success=False len=200    4.2s  peak VRAM 0.90 GiB
+2026-09-15 18:52:12,450 INFO episode   2  success=False len=200    4.1s  peak VRAM 0.90 GiB
+2026-09-15 18:52:16,613 INFO episode   3  success=True  len=200    4.2s  peak VRAM 0.90 GiB
+2026-09-15 18:52:20,794 INFO episode   4  success=True  len=200    4.2s  peak VRAM 0.90 GiB
+2026-09-15 18:52:24,863 INFO episode   5  success=False len=200    4.1s  peak VRAM 0.90 GiB
+2026-09-15 18:52:29,120 INFO episode   6  success=True  len=200    4.3s  peak VRAM 0.90 GiB
+2026-09-15 18:52:33,369 INFO episode   7  success=True  len=200    4.2s  peak VRAM 0.90 GiB
+2026-09-15 18:52:37,569 INFO episode   8  success=True  len=200    4.2s  peak VRAM 0.90 GiB
+2026-09-15 18:52:41,673 INFO episode   9  success=False len=200    4.1s  peak VRAM 0.90 GiB
+2026-09-15 18:52:45,881 INFO episode  10  success=False len=200    4.2s  peak VRAM 0.90 GiB
+2026-09-15 18:52:49,967 INFO episode  11  success=False len=200    4.1s  peak VRAM 0.90 GiB
+2026-09-15 18:52:54,032 INFO episode  12  success=False len=200    4.1s  peak VRAM 0.90 GiB
+2026-09-15 18:52:58,236 INFO episode  13  success=False len=200    4.2s  peak VRAM 0.90 GiB
+2026-09-15 18:53:02,324 INFO episode  14  success=False len=200    4.1s  peak VRAM 0.90 GiB
+2026-09-15 18:53:06,438 INFO episode  15  success=False len=200    4.1s  peak VRAM 0.90 GiB
+2026-09-15 18:53:10,644 INFO episode  16  success=True  len=200    4.2s  peak VRAM 0.90 GiB
+2026-09-15 18:53:14,875 INFO episode  17  success=True  len=200    4.2s  peak VRAM 0.90 GiB
+2026-09-15 18:53:19,002 INFO episode  18  success=False len=200    4.1s  peak VRAM 0.90 GiB
+2026-09-15 18:53:23,173 INFO episode  19  success=False len=200    4.2s  peak VRAM 0.90 GiB

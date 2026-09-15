@@ -1,0 +1,30 @@
+dataset:
+  repo_id: local/lift_ph
+  root: data/lerobot/local_lift_ph
+  val_fraction: 0.1
+  seed: 0
+model:
+  checkpoint: lerobot/smolvla_base
+  dtype: checkpoint
+  n_action_steps: 50
+  resize_imgs_with_padding: null
+lora:
+  target_modules: null
+  r: 16
+  alpha: 32
+  dropout: 0.05
+training:
+  batch_size: 4
+  grad_accum_steps: 2
+  gradient_checkpointing: false
+  steps: 1800
+  lr: 0.0001
+  weight_decay: 1.0e-10
+  grad_clip_norm: 10.0
+  warmup_steps: 120
+  log_every: 25
+  eval_every: 200
+  save_every: 400
+  num_workers: 2
+vram:
+  budget_gb: 5.0

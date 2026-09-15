@@ -1,13 +1,12 @@
 <div align="center">
 
-# Testing SmolVLA on a 6 GB Laptop
+# Testing SmolVLA
 
 <hr>
 
 Can a 450M-parameter vision-language-action model be fine-tuned and run on consumer
 hardware? We measured it end to end: SmolVLA driving a simulated Panda arm on
-robosuite `Lift`, from a zero-shot baseline through LoRA fine-tuning, on one RTX 4050
-Laptop with 6 GB of VRAM.
+robosuite `Lift`, from a zero-shot baseline through LoRA fine-tuning.
 
 ![Python 3.12](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white)
 ![PyTorch 2.11 cu128](https://img.shields.io/badge/PyTorch-2.11_cu128-EE4C2C?logo=pytorch&logoColor=white)
@@ -71,7 +70,7 @@ planned around turned out to be slack.
 
 <div align="center">
 
-![Training and validation loss over 4000 steps, training loss falling from 4.4 to 0.60 and validation reaching 0.705](docs/images/training_loss.png)
+![Training and validation loss over 4000 steps. The 25-step mean of the training loss falls from 4.4 to 0.60 and validation reaches 0.705](docs/images/training_loss.png)
 
 </div>
 
@@ -370,7 +369,7 @@ real stepped robosuite observation rather than a synthetic dict.
 | `regenerate_obs.py` | 5.8 min | rendering only | 3.56 GiB HDF5 |
 | `convert_to_lerobot.py` | not timed | none | 987 MiB LeRobot dataset |
 | `train_lora.py --steps 4000` | 57.6 min | 1.69 GiB | 2.9 MiB adapters |
-| `rollout.py --n-episodes 20` | 1.7 min | 0.90 GiB | metrics and frames |
+| `rollout.py --n-episodes 20` | 1.8 min | 0.90 GiB | metrics and frames |
 
 ---
 
@@ -379,6 +378,7 @@ real stepped robosuite observation rather than a synthetic dict.
 ```
 configs/          one YAML per experiment, with the reasoning in comments
 docs/             per-phase results, the dataset card, figures
+results/          per-run metrics, configs and logs
 scripts/          CLI entry points
 src/
   envs/           robosuite construction, Windows compatibility, adapters
@@ -393,8 +393,11 @@ run writes `results/<phase>/<timestamp>/` with its resolved config, a metrics fi
 and a log. Adapter checkpoints are 2.9 MiB and carry the policy config and processor
 pipelines alongside the weights, which makes them loadable on their own.
 
-`results/` and `data/` stay out of version control. The curated numbers live in
-`docs/`.
+`data/` stays out of version control. So do the bulky parts of `results/`:
+checkpoints, rendered frames, and the HDF5 intermediate. Each run's `metrics.json`,
+resolved `config.yaml` and log are tracked, so every number quoted in this README
+traces back to the run that produced it. `results/phase-2/20260915-185127/` holds
+the 40% evaluation.
 
 ---
 

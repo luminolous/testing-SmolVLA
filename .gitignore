@@ -7,19 +7,21 @@ __pycache__/
 *.so
 
 # Distribution / packaging
+# Anchored to the repo root on purpose: unanchored, these match at any depth
+# and silently swallow project directories such as src/lib or src/env.
 .Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
+/build/
+/develop-eggs/
+/dist/
+/downloads/
+/eggs/
 .eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
+/lib/
+/lib64/
+/parts/
+/sdist/
+/var/
+/wheels/
 share/python-wheels/
 *.egg-info/
 .installed.cfg
@@ -73,7 +75,7 @@ docs/_build/
 
 # PyBuilder
 .pybuilder/
-target/
+/target/
 
 # Jupyter Notebook
 .ipynb_checkpoints
@@ -151,11 +153,11 @@ activemq-data/
 .env
 .envrc
 .venv
-env/
-venv/
-ENV/
-env.bak/
-venv.bak/
+/env/
+/venv/
+/ENV/
+/env.bak/
+/venv.bak/
 
 # Spyder project settings
 .spyderproject
@@ -221,8 +223,16 @@ __marimo__/
 # Agents
 .agents
 CLAUDE.md
-# Experiment outputs. Curated summaries live in docs/ instead.
-results/
+# Experiment outputs. The bulky artefacts stay local; the small per-run records are
+# tracked so every number quoted in docs/ can be traced back to the run that
+# produced it. `results/**` rather than `results/` so the re-includes below can
+# reach inside: git cannot re-include a file whose parent directory is excluded.
+results/**
+!results/**/
+!results/**/metrics.json
+!results/**/config.yaml
+!results/**/*.log
+!results/**/*.txt
 
 # Datasets: downloaded and regenerated, never committed.
 /data/
