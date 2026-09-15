@@ -247,6 +247,65 @@ is required for the comparison to mean anything.
 
 ---
 
+## 4.4 Training run — complete
+
+`results/phase-4/20260915-165042/`
+
+| | Estimated | Actual |
+| --- | --- | --- |
+| Runtime | ~57 min | **25.4 min** (0.846 s/step) |
+| Peak VRAM | 1.7 GiB | **1.687 GiB** of 5.0 GiB |
+| Device VRAM | — | 2.820 GiB of 6.00 GiB |
+| Steps | 1 800 | 1 800 |
+| Epochs | ~1.6 | 1.6 |
+
+**The runtime estimate was 2.2× pessimistic.** Even the 30-step benchmark carried
+worker startup; over 1 800 steps it amortises to 0.846 s/step against the 1.89
+measured. The hour budget was less than half spent.
+
+### Loss
+
+| Steps | Mean train loss |
+| --- | --- |
+| 0–100 | 2.9065 |
+| 100–400 | 1.0439 |
+| 400–800 | 0.8178 |
+| 800–1200 | 0.7566 |
+| 1200–1600 | 0.6864 |
+| 1600–1800 | **0.6714** |
+
+| Step | Val loss |
+| --- | --- |
+| 200 | 1.1774 |
+| 400 | 0.9857 |
+| 600 | 0.8913 |
+| 800 | 0.9445 |
+| 1000 | 0.8694 |
+| 1200 | 0.8435 |
+| 1400 | 0.7947 |
+| **1600** | **0.7684** |
+| 1800 | 0.7893 |
+
+Two readings that matter for §4.6:
+
+1. **Training loss has not plateaued.** It was still falling in the final band. The
+   "loss plateaus high" branch — the only one that justifies Phase 5 — **does not
+   apply**. This model is under-trained, not capacity-limited, which is the expected
+   consequence of deliberately buying 1.6 epochs instead of 5.5.
+2. **Validation bottoms at step 1600** and ticks up at 1800. The train/val gap
+   (0.667 against 0.789) is small, so this is the beginning of the curve flattening
+   rather than real overfitting. `checkpoint-1600` is the one to evaluate.
+
+### A caveat on the validation numbers
+
+`evaluate()` is capped at 20 batches, so each validation measures **80 frames of the
+925** held out. The subset is fixed (`shuffle=False`), so the numbers are comparable
+to each other, but they are not a full validation pass. Widening it costs about four
+minutes per evaluation at this batch size, which is why it is capped; the trend is
+what it is being read for, not the absolute value.
+
+---
+
 ## 4.5 Comparison against the zero-shot baseline
 
 _To be filled in after the run._
