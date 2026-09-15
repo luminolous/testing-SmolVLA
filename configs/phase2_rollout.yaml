@@ -1,0 +1,48 @@
+# Phase 2 zero-shot rollout.
+#
+# IMPORTANT: the action mapping this config drives is arbitrary. SmolVLA's base
+# checkpoint emits 6 SO-100 joint targets in degrees; OSC_POSE consumes a 7-value
+# normalised delta pose. Numbers produced here are an integration test and a floor,
+# not a measure of transfer. See docs/phase-2/result.md.
+
+env:
+  name: Lift
+  robot: Panda
+  controller: OSC_POSE
+  control_freq: 20
+  horizon: 200
+  cameras:
+    - robot0_eye_in_hand
+    - agentview
+  # Phase 0 measured render cost as flat from 128 to 512 px, so this is picked to
+  # match what SmolVLA's datasets used rather than to save time.
+  resolution: 256
+
+model:
+  checkpoint: lerobot/smolvla_base
+  device: cuda
+  instruction: "lift the cube"
+
+  # null leaves the checkpoint as shipped, which means actions stay in normalised
+  # units -- roughly the [-1, 1] OSC_POSE expects. Set to so100 to bind the stored
+  # statistics and get degrees instead; pair that with action_space: degrees.
+  dataset_stats_key: null
+
+  # Phase 1: autocast bought no speed at batch size 1 and cost 0.17 GiB.
+  autocast: none
+
+  # Actions consumed from one predicted chunk before the model is called again.
+  # The checkpoint default is 50, which at 20 Hz is 2.5 s of open-loop control.
+  # Lowering this re-plans more often at proportionally higher inference cost.
+  n_action_steps: 50
+
+rollout:
+  n_episodes: 20
+  seed: 0
+  action_space: normalized   # normalized | degrees
+
+  # Scale the state into [-1, 1]. The checkpoint ships no state statistics, so
+  # LeRobot cannot normalise it and the network would otherwise receive raw
+  # degrees. Measured: raw degrees drove action clipping from 4.9% to 64.3%.
+  normalize_state: true
+  save_frames_every: 0       # 0 disables; N saves every Nth step of episode 0
