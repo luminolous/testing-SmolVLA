@@ -211,9 +211,17 @@ and rebuilds it from XML on *every* reset, re-reading 66+ Panda meshes plus grip
 and arena assets each time. On Windows those file handles are not released, and
 around the tenth episode MuJoCo can no longer open the next mesh.
 
-**Fix.** `hard_reset=False` in
+**Fix at the time.** `hard_reset=False` in
 [`lift_env.py`](../../src/envs/lift_env.py), so `reset()` calls `sim.reset()` on the
 existing simulation.
+
+> **Superseded in Phase 3.** The attribution above is wrong. The leak is in
+> **mujoco 3.1.6**, which leaks ~50 Windows handles per XML load regardless of how
+> the reset is reached; measured at +50 per reset, failing at the tenth, identical
+> with the offscreen renderer on and off. mujoco 3.2.7 leaks none over 60 resets.
+> `hard_reset=False` avoided the symptom and silently cost cube-size randomisation.
+> With the version pinned, `hard_reset` is back at `True`. See
+> [docs/phase-3/result.md](../phase-3/result.md).
 
 Verified on two counts, because the cheap fix here would have quietly destroyed the
 evaluation:
@@ -236,30 +244,56 @@ same leak, much sooner.
 
 ## 2.5 Baseline evaluation — complete
 
+**Canonical run:** `results/phase-2/20260915-153627/`, with full domain
+randomisation. This is the number Phase 4 compares against.
+
 `python scripts/rollout.py --n-episodes 20 --render`
-→ `results/phase-2/20260915-144404/`
 
 | Metric | Value |
 | --- | --- |
 | **Success rate** | **0.0%** (0/20) — as predicted |
 | Episode length | 200.0 ± 0.0 — every episode ran to the horizon, none terminated early |
-| Env step | 7.30 ms |
-| Inference | 506.5 ms per call × 80 calls, 10.13 ms amortised per step |
-| Action clipping | **2.9%** of all values |
+| Env step | 7.03 ms |
+| Inference | 502.7 ms per call × 80 calls, 10.05 ms amortised per step |
+| Action clipping | **2.3%** of all values |
 | Peak VRAM | 1.752 GiB allocated, 2.887 GiB device — flat across all 20 episodes |
-| Wall clock | 3.6 s per episode, ~93 s total |
+| Wall clock | 4.1 s per episode, ~103 s total |
 
 ### Per-dimension action statistics
 
 | dim | mean | std | clip rate |
 | --- | --- | --- | --- |
-| dx | **+0.4497** | 0.3165 | 5.2% |
-| dy | +0.1631 | 0.5017 | 2.8% |
-| dz | −0.0120 | 0.4128 | 1.0% |
-| drx | −0.4071 | 0.3912 | 8.0% |
-| dry | −0.3717 | 0.4047 | 3.0% |
+| dx | **+0.4245** | 0.3199 | 3.7% |
+| dy | +0.1473 | 0.4863 | 2.5% |
+| dz | −0.0081 | 0.4213 | 0.6% |
+| drx | −0.4324 | 0.3740 | 7.6% |
+| dry | −0.3678 | 0.4085 | 1.4% |
 | drz | 0.0000 | 0.0000 | 0.0% |
-| grip | +0.0116 | 0.3041 | 0.0% |
+| grip | +0.0320 | 0.3020 | 0.0% |
+
+### The randomisation caveat, resolved
+
+The first baseline (`results/phase-2/20260915-144404/`) ran with `hard_reset=False`,
+a workaround for what Phase 3 later traced to a mujoco handle leak. That flag also
+suppressed cube-**size** randomisation, which only happens on a hard reset, so those
+20 episodes shared one cube size.
+
+Re-run with the leak fixed and `hard_reset=True`, giving per-episode randomisation
+of both size and position:
+
+| Metric | Fixed cube size | Full randomisation |
+| --- | --- | --- |
+| Success rate | 0.0% | 0.0% |
+| Clip rate | 2.9% | 2.3% |
+| dx mean ± std | +0.4497 ± 0.3165 | +0.4245 ± 0.3199 |
+| drx mean ± std | −0.4071 ± 0.3912 | −0.4324 ± 0.3740 |
+| grip mean ± std | +0.0116 ± 0.3041 | +0.0320 ± 0.3020 |
+| Env step | 7.30 ms | 7.03 ms |
+| Inference / call | 506.5 ms | 502.7 ms |
+
+Every figure moves within noise. The caveat was worth raising and turned out to be
+immaterial — a ±5% cube size makes no difference when the arm leaves the table
+before reaching it.
 
 ### The denormalisation contrast run
 
@@ -363,7 +397,7 @@ arbitrary by construction and documented as such.
 
 | Finding | Matters in | Note |
 | --- | --- | --- |
-| `hard_reset=False` is required on Windows | **Phase 3** | Otherwise mesh file handles leak and MuJoCo fails after ~10 resets. Regeneration resets far more often than that, and robomimic builds its own environment |
+| The reset crash is a mujoco 3.1.6 handle leak | **Phase 3** | Fixed by pinning mujoco 3.2.7, not by `hard_reset`. Do not move that pin without re-running the handle measurement |
 | State must be scaled before the model sees it | **Phase 3, 4** | LeRobot will not do it — no statistics ship with the checkpoint. The converted dataset must carry its own |
 | `IMAGE_CONVENTION = "opencv"` is required | **Phase 3** | Set globally so regenerated dataset images and rollout images agree. Verify it is still in effect when regenerating |
 | Env step in rollout is 7.30 ms, matching Phase 0 | Phase 3, 4 | The earlier "2–4× slower" reading was a cold-start artefact of a 120-step sample. Inference carries a real but mild 1.27× overhead (506 ms against 399 ms) |

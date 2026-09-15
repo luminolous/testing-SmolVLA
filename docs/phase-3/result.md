@@ -308,7 +308,7 @@ inverted frames while evaluating it on correct ones.
 | Dataset actions are 7-dim normalised OSC delta pose | **Phase 4** | Matches the Phase 2 action adapter's target, so fine-tuning defines a head the evaluator can already drive |
 | `use_videos=False` is required on Windows | Phase 4 | torchcodec cannot load. Any LeRobot training path that assumes video decoding will fail |
 | mujoco pin is load-bearing | all | 3.1.6 leaks handles, 3.13 breaks robosuite. Do not move it without re-running the handle measurement |
-| Phase 2 baseline used a fixed cube size | Phase 4 | Consider re-running the zero-shot baseline with `hard_reset=True` before using it as the comparison point |
+| Phase 2 baseline used a fixed cube size | — | **Resolved.** Re-run with `hard_reset=True` and full randomisation: still 0.0%, every action statistic within noise of the original. The canonical baseline is `results/phase-2/20260915-153627/` |
 | Instruction string is `"lift the cube"` | Phase 4 | Recorded in the dataset card; must be passed verbatim at evaluation |
 | State is 6-dim and scaled to `[-1, 1]` | Phase 4 | Built by `ObsAdapter.build_state`. Fine-tuning may want a richer state; changing it means changing both sides at once |
 | Rotation channels carry almost no signal in this task | **Phase 4** | Expert `drx`/`dry` std is 0.022/0.062. A fine-tuned head should learn this quickly, and it is a cheap sanity check on a trained policy: if its rotation output is large, something is wrong |
