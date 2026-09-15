@@ -8,10 +8,10 @@ dataset files alone.
 
 | Field | Value |
 | --- | --- |
-| Source HDF5 | `data\lift\ph\image_256px_2ep.hdf5` |
+| Source HDF5 | `C:\Users\Syauqi Nabil\Robotics\testing-SmolVLA\data\lift\ph\image_256px.hdf5` |
 | Task | lift / ph |
-| Episodes | 2 |
-| Frames | 117 |
+| Episodes | 200 |
+| Frames | 9666 |
 | FPS | 20 |
 | Robot | Panda, 7-DoF |
 | Controller | OSC_POSE, control_delta=True, input range [-1, 1] |
@@ -42,17 +42,17 @@ which is what `obs_adapter.upright()` is for.
 
 ## Action statistics
 
-Sampled over 117 frames.
+Sampled over 509 frames.
 
 | dim | mean | std | min | max |
 | --- | --- | --- | --- | --- |
-| dx | +0.1654 | 0.2659 | -0.2490 | +0.6800 |
-| dy | +0.0142 | 0.1229 | -0.3050 | +0.3620 |
-| dz | -0.1460 | 0.4317 | -0.7410 | +1.0000 |
-| drx | -0.0008 | 0.0184 | -0.0403 | +0.0322 |
-| dry | +0.0144 | 0.0651 | -0.0620 | +0.1975 |
-| drz | -0.0210 | 0.0426 | -0.1196 | +0.0446 |
-| gripper | -0.5043 | 0.8635 | -1.0000 | +1.0000 |
+| dx | +0.1737 | 0.2564 | -0.4990 | +0.9360 |
+| dy | +0.0070 | 0.1270 | -0.3370 | +0.4890 |
+| dz | -0.1711 | 0.4918 | -0.9600 | +1.0000 |
+| drx | +0.0035 | 0.0224 | -0.0789 | +0.0748 |
+| dry | +0.0053 | 0.0624 | -0.0906 | +0.2961 |
+| drz | +0.0112 | 0.0830 | -0.2540 | +0.2943 |
+| gripper | -0.4499 | 0.8931 | -1.0000 | +1.0000 |
 
 ## Validation
 
