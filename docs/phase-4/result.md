@@ -1,6 +1,6 @@
 # Phase 4 — LoRA Fine-Tuning: Results
 
-**Status:** complete — 0% to 30% success rate; Phase 5 assessed as not justified
+**Status:** complete — 0% to 40% success rate; Phase 5 assessed as not justified
 
 ---
 
@@ -313,7 +313,7 @@ same episode count as the baseline. → `results/phase-2/20260915-173822/`
 
 | Metric | Zero-shot baseline | LoRA fine-tuned |
 | --- | --- | --- |
-| **Success rate** | **0.0%** (0/20) | **30.0%** (6/20) |
+| **Success rate** | **0.0%** (0/20) | **30.0%** (6/20) at 1.6 epochs, **40.0%** (8/20) at 3 |
 | Action clipping | 2.3% | 9.1% |
 | Peak VRAM | 1.752 GiB | **0.899 GiB** |
 | Inference / call | 502.7 ms | 498.2 ms |
@@ -378,6 +378,45 @@ question the project was built to answer.
 
 ---
 
+## Does better validation loss buy success? Yes.
+
+That relation is not automatic in behaviour cloning — a lower action-prediction loss
+can coexist with a policy that never closes the loop. Here it held.
+
+| Run | Val loss | Success | Clipping | Steps at which success occurred |
+| --- | --- | --- | --- | --- |
+| Zero-shot | — | **0%** (0/20) | 2.3% | — |
+| LoRA, 1.6 epochs | 0.7684 | **30%** (6/20) | 9.1% | 43, 43, 44, 47, 49, 50 |
+| **LoRA, 3 epochs** | **0.7055** | **40%** (8/20) | 12.0% | **39, 40, 42, 43, 43, 44, 45, 49** |
+
+The extra epochs bought more than count. The successes also arrive **earlier** —
+median step 43 against 45.5 — which is now *below* the expert demonstration mean of
+48.3. The policy is not merely reproducing the demonstrated schedule, it is
+completing slightly ahead of it.
+
+### Action statistics at 3 epochs
+
+| dim | Expert demos | LoRA 1.6 ep | **LoRA 3 ep** |
+| --- | --- | --- | --- |
+| **dx** | **+0.174 ± 0.256** | +0.114 ± 0.200 | **+0.174 ± 0.186** |
+| dy | +0.007 ± 0.127 | +0.057 ± 0.140 | +0.052 ± 0.140 |
+| dz | −0.171 ± 0.492 | +0.479 ± 0.721 | +0.512 ± 0.650 |
+| drx | +0.004 ± 0.022 | +0.003 ± 0.021 | +0.003 ± 0.021 |
+| dry | +0.005 ± 0.062 | +0.127 ± 0.124 | +0.147 ± 0.119 |
+| drz | +0.011 ± 0.083 | +0.002 ± 0.065 | +0.004 ± 0.056 |
+| **grip** | **−0.450 ± 0.893** | +0.354 ± 0.820 | **+0.495 ± 0.863** |
+
+`dx` now matches the expert mean exactly (+0.174) with a tighter spread, and the
+gripper's standard deviation has moved further toward the expert's bimodality
+(0.863 against 0.893). Gripper clipping rose to 55.4%, which on a channel the
+experts drive to ±1 is the policy committing harder rather than a defect.
+
+`dz` remains the outlier: +0.512 against the expert's −0.171, clipping 28.9%. Three
+epochs did not correct it, which makes it look structural rather than
+under-trained — the clearest target for the next piece of work.
+
+---
+
 ## The longer run
 
 `python scripts/train_lora.py --steps 4000` → `results/phase-4/20260915-174932/`
@@ -424,7 +463,8 @@ cheaper next step."
 2. **Investigate the `dz` saturation.** 34% clipping on the lift axis, commanding
    upward motion far harder than any expert demonstration. This is a concrete,
    diagnosable defect rather than a capacity ceiling.
-3. **More data via MimicGen**, as Phase 3 anticipated.
+3. **More data via MimicGen**, as Phase 3 anticipated. Going from 1.6 to 3 epochs
+   bought 10 percentage points, so more of the same data is still paying.
 4. **Raise the LoRA rank** — the one lever that would begin to test capacity, and
    which must be tried before Phase 5 could honestly be entered.
 
