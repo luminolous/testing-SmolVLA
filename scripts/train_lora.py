@@ -22,6 +22,7 @@ import yaml
 REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT))
 
+from src.log_utils import configure_logging  # noqa: E402
 from src.train.lora_finetune import (  # noqa: E402
     OutOfMemoryHint,
     train,
@@ -44,6 +45,8 @@ def main() -> int:
     parser.add_argument("--gradient-checkpointing", action="store_true")
     parser.add_argument("--rank", type=int, default=None)
     parser.add_argument("--warmup-steps", type=int, default=None)
+    parser.add_argument("--debug-logs", action="store_true",
+                        help="do not silence third-party loggers")
     args = parser.parse_args()
 
     cfg = yaml.safe_load(args.config.read_text(encoding="utf-8"))
@@ -70,13 +73,7 @@ def main() -> int:
     (run_dir / "config.yaml").write_text(yaml.safe_dump(cfg, sort_keys=False),
                                          encoding="utf-8")
 
-    logging.basicConfig(
-        level=logging.INFO,
-        format="%(asctime)s %(levelname)s %(message)s",
-        handlers=[logging.FileHandler(run_dir / "train.log", encoding="utf-8"),
-                  logging.StreamHandler()],
-        force=True,
-    )
+    configure_logging(log_file=run_dir / "train.log", quiet_third_party=not args.debug_logs)
 
     print(f"run dir     : {run_dir}")
     print(f"mode        : {'DRY RUN' if args.dry_run else 'full training'}")

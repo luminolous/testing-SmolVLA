@@ -146,6 +146,30 @@ mapping that was a category error by construction, and there is now nothing to m
 
 ---
 
+## Log noise — one real bug, one harmless warning
+
+The first full training run printed roughly 200 lines of tracebacks before reaching
+step 1. Nothing was wrong — training ran normally — but two things made the output
+unreadable, and one was self-inflicted.
+
+**Self-inflicted:** `logging.basicConfig(level=INFO)` configures the **root** logger,
+so every third-party library began printing its INFO records. The `HTTP Request`
+lines were HuggingFace cache validation (HEAD requests against files already on
+disk), not downloads.
+
+**Harmless:** the `torchcodec` probe. `lerobot.utils.import_utils` logs a warning
+that embeds torchcodec's full RuntimeError, which itself contains one traceback per
+FFmpeg version tried — five per occurrence, three occurrences per run. Expected on
+Windows since Phase 3, and irrelevant here: the dataset is PNG, so no video decoder
+is ever used.
+
+[`src/log_utils.py`](../../src/log_utils.py) now keeps the project's own loggers at
+INFO and pins the known noisy ones above it. Output drops from ~200 lines to one.
+`--debug-logs` restores the full firehose when a download or decoder is genuinely
+what needs debugging.
+
+---
+
 ## 4.4 Training run — **queued for the user**
 
 ```bash

@@ -33,6 +33,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT))
 
 from src.envs.action_adapter import ActionAdapter  # noqa: E402
+from src.log_utils import configure_logging  # noqa: E402
 from src.envs.lift_env import make_lift_env  # noqa: E402
 from src.envs.obs_adapter import ObsAdapter  # noqa: E402
 from src.model.smolvla_wrapper import SmolVLAWrapper  # noqa: E402
@@ -71,15 +72,7 @@ def build_run_dir() -> Path:
 
 
 def setup_logging(run_dir: Path, verbose: bool) -> None:
-    handlers: list[logging.Handler] = [logging.FileHandler(run_dir / "rollout.log", encoding="utf-8")]
-    if verbose:
-        handlers.append(logging.StreamHandler())
-    logging.basicConfig(
-        level=logging.INFO,
-        format="%(asctime)s %(levelname)s %(name)s: %(message)s",
-        handlers=handlers,
-        force=True,
-    )
+    configure_logging(log_file=run_dir / "rollout.log", console=verbose)
 
 
 def run_episode(
