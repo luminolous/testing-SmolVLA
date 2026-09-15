@@ -198,6 +198,9 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--checkpoint", default="lerobot/smolvla_base")
     parser.add_argument("--device", default="cuda")
+    parser.add_argument("--float32", action="store_true",
+                        help="cast all weights to float32 instead of keeping the "
+                             "checkpoint mix; doubles the weight footprint")
     parser.add_argument("--autocast", default="none",
                         choices=["bfloat16", "float16", "none"],
                         help="compute dtype via torch.autocast; weights are always "
@@ -220,13 +223,15 @@ def main() -> int:
     section("1.1  CHECKPOINT LOAD")
     print(f"checkpoint            : {args.checkpoint}")
     print(f"device                : {args.device}")
-    print(f"weight dtype          : float32 (forced -- modeling_smolvla.py:808)")
+    print(f"weight dtype          : "
+          f"{'float32 (forced)' if args.float32 else 'checkpoint mix (bf16 + fp32)'}")
     print(f"compute dtype         : {args.autocast} via torch.autocast")
     print(f"stats key             : {args.stats_key or '<none, as shipped>'}")
 
     model = SmolVLAWrapper(
         checkpoint=args.checkpoint,
         device=args.device,
+        dtype=torch.float32 if args.float32 else None,
         autocast_dtype=None if args.autocast == "none" else getattr(torch, args.autocast),
         dataset_stats_key=args.stats_key,
         seed=args.seed,

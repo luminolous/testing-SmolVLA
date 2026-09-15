@@ -27,15 +27,21 @@ units. :attr:`SmolVLAWrapper.action_unnormalised` reports whether the postproces
 is actually able to unnormalise, and `dataset_stats_key` selects one of the stored
 statistic sets to make it do so.
 
-**Precision.** Half-precision *weights* do not work with lerobot 0.6.1.
-``modeling_smolvla.py:808`` hardcodes ``suffix_out.to(dtype=torch.float32)`` before
-``action_out_proj``, so that projection must hold float32 weights. The float32 then
-propagates: ``v_t`` -> ``x_t`` -> ``action_in_proj`` -> ``action_time_mlp`` -> the
-suffix embeddings handed back to the expert, which would need float32 too. There is
-no clean place to cut, so the whole policy is loaded in float32 and bfloat16 is
-obtained through ``torch.autocast`` instead. That keeps compute in bfloat16 while
-weights stay float32 at roughly 1.7 GiB. Phase 4 should note that "base weights in
-bfloat16" is not reachable without patching lerobot.
+**Precision.** The checkpoint ships a deliberate mix: 474 bfloat16 tensors for the
+VLM backbone and 26 float32 ones, which include the flow-matching projections.
+That mix is not an accident -- ``modeling_smolvla.py:808`` hardcodes
+``suffix_out.to(dtype=torch.float32)`` before ``action_out_proj``, so those
+projections have to be float32 while everything upstream can be half precision.
+
+Casting the policy to a *uniform* dtype is what breaks it. All-bfloat16 fails at
+``action_out_proj`` (float32 input, bfloat16 weight); all-float32 works but doubles
+the weight footprint for nothing. The default here is therefore to leave the
+checkpoint's dtypes alone, which measured 0.844 GiB of weights and 0.905 GiB peak
+against 1.677 and 1.756 GiB for uniform float32, and ran 359 ms per chunk against
+400 ms.
+
+The one thing this requires is that the flow-matching noise match the projections'
+dtype rather than the backbone's -- see :meth:`SmolVLAWrapper.make_noise`.
 """
 
 from __future__ import annotations
@@ -44,6 +50,7 @@ import contextlib
 import logging
 import time
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any
 
 import numpy as np
@@ -85,17 +92,20 @@ class SmolVLAWrapper:
         self,
         checkpoint: str = DEFAULT_CHECKPOINT,
         device: str = "cuda",
-        dtype: torch.dtype = torch.float32,
+        dtype: torch.dtype | None = None,
         autocast_dtype: torch.dtype | None = None,
         dataset_stats_key: str | None = None,
         seed: int | None = None,
+        adapter_path: str | Path | None = None,
     ) -> None:
         """
         Args:
             checkpoint: Hub id or local path of the SmolVLA checkpoint.
             device: Torch device for the policy.
-            dtype: Weight dtype. Must be ``float32`` -- see the module docstring for
-                why half-precision weights do not work here.
+            dtype: Cast every weight to this dtype. ``None`` (the default) keeps the
+                checkpoint's own mixed precision, which is both correct and roughly
+                half the memory. Only ``float32`` is a valid cast; a uniform
+                half-precision cast breaks ``action_out_proj``.
             autocast_dtype: Compute dtype for inference, via ``torch.autocast``.
                 Off by default: measured on this GPU it bought no speed (401.4 ms
                 against 399.7 ms per chunk) and cost 0.17 GiB more VRAM, since the
@@ -113,13 +123,13 @@ class SmolVLAWrapper:
         from lerobot.policies.factory import make_pre_post_processors
         from lerobot.policies.smolvla.modeling_smolvla import SmolVLAPolicy
 
-        if dtype is not torch.float32:
+        if dtype is not None and dtype is not torch.float32:
             raise ValueError(
-                "SmolVLA in lerobot 0.6.1 only runs with float32 weights: "
-                "modeling_smolvla.py:808 hardcodes an upcast to float32 before "
-                "action_out_proj, and the float32 then propagates through the whole "
-                "flow-matching loop. Use autocast_dtype=torch.bfloat16 for "
-                "half-precision compute instead."
+                f"refusing to cast SmolVLA to {dtype}: modeling_smolvla.py:808 "
+                "hardcodes an upcast to float32 before action_out_proj, so a uniform "
+                "half-precision cast fails there with 'mat1 and mat2 must have the "
+                "same dtype'. Pass dtype=None to keep the checkpoint's own mix, "
+                "which is what it was saved with."
             )
 
         self.checkpoint = checkpoint
@@ -137,17 +147,37 @@ class SmolVLAWrapper:
             torch.cuda.empty_cache()
         vram_before = _vram_used()
 
+        self.adapter_path = Path(adapter_path) if adapter_path else None
+
         t0 = time.perf_counter()
-        self.policy = SmolVLAPolicy.from_pretrained(checkpoint)
-        self.policy.to(device=self.device, dtype=self.dtype)
+        if self.adapter_path is None:
+            self.policy = SmolVLAPolicy.from_pretrained(checkpoint)
+        else:
+            self.policy = self._load_with_adapter(checkpoint, self.adapter_path)
+
+        if self.dtype is None:
+            self.policy.to(device=self.device)
+        else:
+            self.policy.to(device=self.device, dtype=self.dtype)
         self.policy.eval()
         load_seconds = time.perf_counter() - t0
 
         self.config = self.policy.config
-        self.preprocessor, self.postprocessor = make_pre_post_processors(
-            policy_cfg=self.config,
-            pretrained_path=checkpoint,
-        )
+        if self.adapter_path is None:
+            self.preprocessor, self.postprocessor = make_pre_post_processors(
+                policy_cfg=self.config,
+                pretrained_path=checkpoint,
+            )
+        else:
+            # The fine-tuned checkpoint carries processors built from the training
+            # dataset's statistics. Using the base checkpoint's here instead would
+            # silently skip normalisation -- see the module docstring -- and the
+            # policy was trained on normalised actions, so the output would be
+            # wrong by the action std rather than merely unscaled.
+            self.preprocessor, self.postprocessor = make_pre_post_processors(
+                policy_cfg=self.config,
+                pretrained_path=str(self.adapter_path / "processors"),
+            )
 
         if dataset_stats_key is not None:
             self._bind_action_stats(dataset_stats_key)
@@ -170,6 +200,33 @@ class SmolVLAWrapper:
                 "one of the stored statistic sets.",
                 AVAILABLE_STAT_KEYS[0],
             )
+
+    @staticmethod
+    def _load_with_adapter(base_checkpoint: str, adapter_path: Path):
+        """Load the base policy under the fine-tune's config, then merge the LoRA.
+
+        The adapter alone is not loadable. The saved `policy_config` carries the
+        fine-tuning dataset's feature shapes -- two cameras and a 7-value action
+        against the base checkpoint's three and six -- and the base weights have to
+        be instantiated under those shapes before the adapter will attach.
+
+        The adapter is merged into the weights rather than kept as a wrapper.
+        Inference then costs exactly what the base model costs, with no per-layer
+        adapter arithmetic, which matters at 50 flow-matching passes per call.
+        """
+        from peft import PeftModel
+
+        from lerobot.policies.smolvla.configuration_smolvla import SmolVLAConfig
+        from lerobot.policies.smolvla.modeling_smolvla import SmolVLAPolicy
+
+        config = SmolVLAConfig.from_pretrained(str(adapter_path / "policy_config"))
+        config.pretrained_path = base_checkpoint
+        policy = SmolVLAPolicy.from_pretrained(base_checkpoint, config=config)
+
+        peft_model = PeftModel.from_pretrained(policy, str(adapter_path))
+        merged = peft_model.merge_and_unload()
+        logger.info("merged LoRA adapter from %s", adapter_path)
+        return merged
 
     # -- contract ---------------------------------------------------------------
 
@@ -288,16 +345,21 @@ class SmolVLAWrapper:
     def _make_noise(self, batch_size: int) -> torch.Tensor:
         """Flow-matching noise in the policy's own dtype.
 
-        LeRobot's ``VLAFlowMatching.sample_noise()`` takes only a shape and a device
-        and so always produces float32. With half-precision weights the first
-        ``action_in_proj`` matmul then fails with "mat1 and mat2 must have the same
-        dtype". Supplying noise explicitly is the supported way around it --
-        ``sample_actions`` only generates its own when ``noise is None``.
+        The dtype must match ``action_in_proj``, not the backbone. Under the
+        checkpoint's mixed precision the backbone is bfloat16 while that projection
+        is float32, and getting it wrong fails immediately with "mat1 and mat2 must
+        have the same dtype". Reading it off the module is more robust than
+        assuming, since a fine-tuned checkpoint may differ.
+
+        Supplying noise at all is necessary because LeRobot's
+        ``VLAFlowMatching.sample_noise()`` takes only a shape and a device, so it
+        cannot honour any of this. ``sample_actions`` generates its own only when
+        ``noise is None``.
         """
         return torch.randn(
             (batch_size, self.config.chunk_size, self.config.max_action_dim),
             device=self.device,
-            dtype=self.dtype,
+            dtype=self.policy.model.action_in_proj.weight.dtype,
             generator=self._generator,
         )
 
@@ -305,7 +367,9 @@ class SmolVLAWrapper:
         batch: dict[str, Any] = {}
         for key, value in observation.items():
             tensor = torch.as_tensor(value) if not torch.is_tensor(value) else value
-            batch[key] = tensor.to(device=self.device, dtype=self.dtype)
+            # float32 regardless of the weights: the preprocessor normalises in
+            # float32 and the model casts to the backbone dtype itself.
+            batch[key] = tensor.to(device=self.device, dtype=torch.float32)
         batch["task"] = instruction
         return batch
 

@@ -91,12 +91,30 @@ class ActionAdapterStats:
         return np.sqrt(np.maximum(var, 0.0))
 
 
+Mapping = Literal["arbitrary", "identity"]
+
+
 class ActionAdapter:
     """Map a SmolVLA action onto a robosuite `OSC_POSE` action."""
 
-    def __init__(self, action_space: ActionSpace = "normalized") -> None:
+    def __init__(
+        self,
+        action_space: ActionSpace = "normalized",
+        mapping: Mapping = "arbitrary",
+    ) -> None:
         """
         Args:
+            mapping: How to get from the model's output to a robosuite action.
+
+                ``"arbitrary"`` -- the base checkpoint, whose 6 outputs are SO-100
+                joint targets. Everything in this module's docstring applies.
+
+                ``"identity"`` -- a fine-tuned checkpoint, which emits the 7
+                robosuite dimensions directly because it was trained on them. No
+                mapping is involved; the action is clipped and passed through. This
+                is the whole point of Phases 3 and 4: the arbitrary mapping stops
+                existing.
+
             action_space: Which units the incoming action is in.
 
                 ``"normalized"`` -- the checkpoint as shipped, whose output is
@@ -110,24 +128,34 @@ class ActionAdapter:
                 turns that into an actual measurement.
         """
         self.action_space = action_space
+        self.mapping = mapping
         self.stats = ActionAdapterStats()
 
     def __call__(self, action: np.ndarray) -> np.ndarray:
         action = np.asarray(action, dtype=np.float64).squeeze()
         if action.ndim != 1:
             raise ValueError(f"expected a 1-D action, got shape {action.shape}")
-        if action.shape[0] < ARM_DIMS + 1:
-            raise ValueError(
-                f"expected at least {ARM_DIMS + 1} values, got {action.shape[0]}"
-            )
 
-        # Order matters and follows §2.3: units first, then convention, then
-        # clipping. There is no denormalisation step here -- that happens upstream
-        # in SmolVLAWrapper, which owns the checkpoint statistics.
-        raw = np.zeros(OSC_ACTION_DIM, dtype=np.float64)
-        raw[:ARM_DIMS] = action[:ARM_DIMS]
-        raw[YAW_INDEX] = 0.0
-        raw[GRIPPER_INDEX] = action[ARM_DIMS]
+        if self.mapping == "identity":
+            if action.shape[0] != OSC_ACTION_DIM:
+                raise ValueError(
+                    f"identity mapping expects {OSC_ACTION_DIM} values, got "
+                    f"{action.shape[0]}. A 6-value action means the base checkpoint, "
+                    f"which needs mapping='arbitrary'"
+                )
+            raw = action.copy()
+        else:
+            if action.shape[0] < ARM_DIMS + 1:
+                raise ValueError(
+                    f"expected at least {ARM_DIMS + 1} values, got {action.shape[0]}"
+                )
+            # Order matters and follows §2.3: units first, then convention, then
+            # clipping. There is no denormalisation step here -- that happens
+            # upstream in SmolVLAWrapper, which owns the checkpoint statistics.
+            raw = np.zeros(OSC_ACTION_DIM, dtype=np.float64)
+            raw[:ARM_DIMS] = action[:ARM_DIMS]
+            raw[YAW_INDEX] = 0.0
+            raw[GRIPPER_INDEX] = action[ARM_DIMS]
 
         clipped = np.clip(raw, -1.0, 1.0)
         self.stats.update(raw, clipped != raw)
@@ -135,11 +163,19 @@ class ActionAdapter:
 
     def describe_mapping(self) -> str:
         """Human-readable record of the mapping, for the run log."""
+        names = ["dx", "dy", "dz", "drx", "dry", "drz", "gripper"]
+        if self.mapping == "identity":
+            return (
+                f"action space in : {self.action_space}\n"
+                "identity mapping -- the policy emits robosuite's 7 dimensions "
+                f"directly ({', '.join(names)}).\nNo arbitrary correspondence is "
+                "involved; values are clipped to [-1, 1] and passed through."
+            )
+
         lines = [
             f"action space in : {self.action_space}",
             "model dim -> robosuite dim (OSC_POSE)",
         ]
-        names = ["dx", "dy", "dz", "drx", "dry", "drz", "gripper"]
         for i in range(ARM_DIMS):
             lines.append(f"    {i} -> {i} ({names[i]})    ARBITRARY")
         lines.append(f"    - -> {YAW_INDEX} ({names[YAW_INDEX]})   held at 0, no counterpart")

@@ -158,7 +158,30 @@ default (`freeze_vision_encoder=True`, `train_expert_only=True`), and only 16 of
 SmolVLM2's layers are used (`num_vlm_layers=16`) — the loader logs
 `Reducing the number of VLM layers to 16`.
 
-### Precision is forced to float32
+> **Corrected in Phase 4.** The conclusion below — that float32 is forced — is
+> wrong, and the measurements in this section were taken under that mistake. The
+> checkpoint **ships mixed precision**: 474 bfloat16 tensors for the backbone and 26
+> float32 ones for the flow-matching projections, which is exactly what line 808
+> requires. Leaving that mix alone works. What fails is casting to a *uniform*
+> dtype.
+>
+> | | Forced float32 (below) | Checkpoint mix (correct) |
+> | --- | --- | --- |
+> | Weight bytes | 1.677 GiB | **0.844 GiB** |
+> | VRAM after load | 1.766 GiB | **0.885 GiB** |
+> | Peak VRAM | 1.756 GiB | **0.904 GiB** |
+> | Latency, mean | 399.71 ms | **353.43 ms** |
+> | p95 | 410.97 ms | **367.68 ms** |
+>
+> Output values are unchanged (`[-2.95, 1.38]`, sensitivity 0.805), so this is
+> purely a memory and speed correction. The one requirement is that the
+> flow-matching noise match `action_in_proj`'s dtype rather than the backbone's;
+> `SmolVLAWrapper.make_noise` now reads it off the module.
+>
+> The wrapper defaults to the checkpoint's own dtypes. `--float32` reproduces the
+> figures below.
+
+### Precision: the original, mistaken conclusion
 
 `modeling_smolvla.py:808` hardcodes an upcast before the output projection:
 
@@ -288,7 +311,7 @@ proportionally higher inference cost.
 | Action space is 6-dim SO-100 joint degrees; robosuite is 7-dim OSC delta pose | **Phase 2** | No honest dimension mapping exists. The zero-shot baseline's premise needs a decision before §2.5 is run |
 | Actions are normalised unless statistics are explicitly bound | Phase 2 | Silent. Use `dataset_stats_key=`, and assert `action_unnormalised` before trusting any rollout number |
 | No `observation.state` statistics exist in the checkpoint | Phase 2, 3 | State normalisation is also a no-op. Phase 3's converted dataset must supply its own statistics |
-| Half-precision weights are impossible without patching lerobot | **Phases 4, 5** | `phase-4-lora.md` §4.2 requires "base weights in bfloat16". Not reachable as things stand: budget for 1.68 GiB of float32 weights, not 0.9 GiB. This tightens Phase 5 considerably |
+| ~~Half-precision weights are impossible~~ **Corrected in Phase 4** | **Phases 4, 5** | The checkpoint already ships bfloat16 for the backbone and float32 for the flow-matching projections. Keep that mix: 0.844 GiB of weights, 0.904 GiB peak. `phase-4-lora.md` §4.2's bfloat16 requirement is satisfied out of the box. Casting to a uniform dtype is the thing that breaks |
 | Autocast buys nothing at batch size 1 | Phases 2, 4 | Off by default. Do not reach for it as an optimisation without measuring |
 | `sample_noise()` ignores dtype; noise must be supplied externally | Phase 2 | Already handled in the wrapper, and it is also how runs are made reproducible |
 | 50-step open-loop horizon (2.5 s at 20 Hz) | Phase 2 | A candidate explanation for contact-stage failures. Test before concluding domain gap |

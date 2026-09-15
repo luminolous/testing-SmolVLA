@@ -1,0 +1,80 @@
+# Phase 4 LoRA fine-tuning of SmolVLA on robosuite Lift.
+#
+# Phase 2 established that the base checkpoint and robosuite are structurally
+# incompatible: SmolVLA emits 6 SO-100 joint targets in degrees, robosuite consumes
+# a 7-value normalised delta pose. Fine-tuning is the remedy, not a refinement.
+
+dataset:
+  repo_id: local/lift_ph
+  root: data/lerobot/local_lift_ph
+
+  # Held out by episode, never by frame. Frames inside one episode are strongly
+  # correlated, so a frame-level split leaks the validation set into training and
+  # makes the validation loss meaningless.
+  val_fraction: 0.1
+  seed: 0
+
+model:
+  checkpoint: lerobot/smolvla_base
+
+  # 4.2 asks for bfloat16 base weights. The checkpoint already ships them: 474
+  # bfloat16 tensors for the backbone and 26 float32 ones for the flow-matching
+  # projections, which modeling_smolvla.py:808 requires to be float32. 0.844 GiB
+  # of weights. "checkpoint" leaves that mix alone; casting to a single dtype
+  # either breaks action_out_proj (bfloat16) or doubles the footprint (float32).
+  dtype: checkpoint
+
+  # Actions consumed per inference at evaluation time. Training is unaffected.
+  n_action_steps: 50
+
+lora:
+  # 4.1 -- what gets adapted, and why.
+  #
+  # target_modules: null uses lerobot's own defaults for SmolVLA, which are the
+  # q/v projections of the action expert plus state_proj, action_in_proj,
+  # action_out_proj and action_time_mlp_in/out
+  # (modeling_smolvla.py:_get_default_peft_targets).
+  #
+  # The vision encoder is FROZEN, and not by default -- by evidence. Phase 2's
+  # saved frames show the cube correctly framed and correctly oriented in the
+  # wrist camera at step 0, so the visual path works. The failure is entirely in
+  # the action mapping. Adapting the encoder would cost memory to fix something
+  # that is not broken. Revisit only if training loss plateaus high.
+  #
+  # The action projections are included as LoRA targets rather than trained in
+  # full. They are dimension-agnostic -- they operate at max_action_dim=32 and the
+  # slice to the real action dim happens afterwards -- so going from 6 to 7 output
+  # dimensions needs no new parameters at all. Raise the rank first if the model
+  # underfits; unfreezing them fully is the next step after that.
+  target_modules: null
+
+  # Start small. Rank is the first thing to raise on underfitting.
+  r: 16
+  alpha: 32
+  dropout: 0.05
+
+training:
+  # 4.2 -- memory-conscious setup for 6 GB.
+  #
+  # batch_size is the first knob to reduce on OOM, gradient_checkpointing the
+  # second. Effective batch = batch_size * grad_accum_steps.
+  batch_size: 2
+  grad_accum_steps: 8
+  gradient_checkpointing: false
+
+  steps: 3000
+  lr: 1.0e-4
+  weight_decay: 1.0e-10
+  grad_clip_norm: 10.0
+  warmup_steps: 200
+
+  log_every: 25
+  eval_every: 250
+  save_every: 500
+
+  # Dataloader workers. Windows spawns processes rather than forking, so each
+  # worker re-imports torch; 0 keeps it simple and the dataset is local PNG.
+  num_workers: 0
+
+vram:
+  budget_gb: 5.0

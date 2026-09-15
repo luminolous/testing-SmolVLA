@@ -260,6 +260,11 @@ def main() -> int:
     parser.add_argument("--seed", type=int, default=None)
     parser.add_argument("--render", action="store_true",
                         help="save camera frames from episode 0 into the run dir")
+    parser.add_argument("--adapter", type=Path, default=None,
+                        help="LoRA checkpoint directory from scripts/train_lora.py. "
+                             "Switches the action mapping to identity, since a "
+                             "fine-tuned policy emits robosuite's 7 dimensions "
+                             "directly")
     parser.add_argument("--raw-state", action="store_true",
                         help="feed unscaled degrees instead of a [-1, 1] state")
     parser.add_argument("--verbose", action="store_true")
@@ -300,10 +305,13 @@ def main() -> int:
         else getattr(torch, model_cfg["autocast"]),
         dataset_stats_key=model_cfg["dataset_stats_key"],
         seed=roll_cfg["seed"],
+        adapter_path=args.adapter,
     )
     model.policy.config.n_action_steps = int(model_cfg["n_action_steps"])
     print(model.load_report)
     print(f"actions unnormalised: {model.action_unnormalised}")
+    if args.adapter:
+        print(f"adapter             : {args.adapter}")
 
     env = make_lift_env(
         cameras=tuple(env_cfg["cameras"]),
@@ -318,7 +326,10 @@ def main() -> int:
         state_dim=model.state_dim,
         normalize_state=bool(roll_cfg.get("normalize_state", True)),
     )
-    action_adapter = ActionAdapter(action_space=roll_cfg["action_space"])
+    action_adapter = ActionAdapter(
+        action_space=roll_cfg["action_space"],
+        mapping="identity" if args.adapter else "arbitrary",
+    )
     logger.info("action mapping:\n%s", action_adapter.describe_mapping())
 
     frame_dir = None
