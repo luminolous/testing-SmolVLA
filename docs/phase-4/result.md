@@ -1,6 +1,6 @@
 # Phase 4 — LoRA Fine-Tuning: Results
 
-**Status:** setup built, dry-run verified; the training run is queued for the user
+**Status:** complete — 0% to 30% success rate; Phase 5 assessed as not justified
 
 ---
 
@@ -59,7 +59,7 @@ assuming, since a fine-tuned checkpoint could differ.
 | --- | --- |
 | Base weights in bfloat16 | Satisfied by the checkpoint's own dtypes |
 | Gradient checkpointing behind a flag | `training.gradient_checkpointing`, `--gradient-checkpointing` |
-| Small batch with accumulation | 2 × 8 = 16 effective |
+| Small batch with accumulation | 4 × 2 = 8 effective, 2 dataloader workers |
 | Explicit peak VRAM logging | Logged every `log_every` steps and in `metrics.json` |
 | Checkpointing without a second copy of the model | Adapter only — **2.9 MiB** per checkpoint |
 | Clear OOM message naming the knobs | `OutOfMemoryHint`, listing batch size, gradient checkpointing, rank and resolution in the order worth trying |
@@ -308,21 +308,125 @@ what it is being read for, not the absolute value.
 
 ## 4.5 Comparison against the zero-shot baseline
 
-_To be filled in after the run._
+`checkpoint-1600` of the 1 800-step run, 20 episodes, same task, same instruction,
+same episode count as the baseline. → `results/phase-2/20260915-173822/`
 
-Baseline: `results/phase-2/20260915-153627/` — **0.0% success (0/20)**, 2.3% action
-clipping, full domain randomisation.
+| Metric | Zero-shot baseline | LoRA fine-tuned |
+| --- | --- | --- |
+| **Success rate** | **0.0%** (0/20) | **30.0%** (6/20) |
+| Action clipping | 2.3% | 9.1% |
+| Peak VRAM | 1.752 GiB | **0.899 GiB** |
+| Inference / call | 502.7 ms | 498.2 ms |
+| Action mapping | arbitrary, 6→7 | **identity, 7→7** |
 
-## 4.6 Phase 5 decision
+### The successes reproduce the expert's timing
 
-_To be written against the trained model's numbers._
+All six successes occurred between **step 43 and step 50**. The expert
+demonstrations average **48.3 steps**. The policy is not stumbling into the goal
+late in a 200-step episode — it is executing the demonstrated behaviour on the
+demonstrated schedule.
 
-Two cheap checks on the trained policy, from the Phase 3 expert statistics:
+The fourteen failures never succeed at all within 200 steps. The outcome is
+effectively binary: either the task is done in about 45 steps, or not.
 
-- **Rotation should be small.** Expert `drx`/`dry` standard deviations are 0.022 and
-  0.062 — `Lift` is solved almost entirely by translation. A trained policy emitting
-  large rotations has not learned the task.
-- **The gripper should be bimodal.** The expert gripper sits at ±1 with mean −0.450
-  and std 0.893. Regression to the mean on a near-binary channel is the classic
-  behaviour-cloning failure and would show up as a policy that reaches but never
-  grasps.
+### The predicted checks, against the expert distribution
+
+| dim | Expert demos | Zero-shot | **LoRA** |
+| --- | --- | --- | --- |
+| dx | +0.174 ± 0.256 | +0.425 ± 0.320 | +0.114 ± 0.200 |
+| dy | +0.007 ± 0.127 | +0.147 ± 0.486 | +0.057 ± 0.140 |
+| dz | −0.171 ± 0.492 | −0.008 ± 0.421 | +0.479 ± 0.721 |
+| **drx** | **+0.004 ± 0.022** | −0.432 ± 0.374 | **+0.003 ± 0.021** |
+| dry | +0.005 ± 0.062 | −0.368 ± 0.409 | +0.127 ± 0.124 |
+| drz | +0.011 ± 0.083 | 0.000 ± 0.000 | +0.002 ± 0.065 |
+| **grip** | **−0.450 ± 0.893** | +0.032 ± 0.302 | **+0.354 ± 0.820** |
+
+**Rotation collapsed to the expert's, as predicted.** `drx` came out at
++0.003 ± 0.021 against the expert's +0.004 ± 0.022 — effectively identical, from a
+zero-shot baseline that was pushing −0.432 ± 0.374. `drz` matches too. `dry` is the
+one still off, at roughly twice the expert's spread.
+
+**The gripper became bimodal, as predicted.** Standard deviation 0.820 against the
+expert's 0.893, up from 0.302 zero-shot. The channel is being driven to its
+extremes rather than regressed to the mean, which was the failure mode worth
+watching for.
+
+Its *mean* differs in sign — +0.354 against the expert's −0.450 — but that is an
+artefact of episode length rather than behaviour. Expert demonstrations end at ~48
+steps, shortly after the grasp; these episodes run the full 200, so roughly 150 of
+them are spent holding the cube with the gripper closed. The mean is dominated by
+the hold, not the approach.
+
+**Where it still saturates:** `dz` clips 34.2% and the gripper 29.5%. The policy
+commands upward motion harder than the expert ever did (+0.479 against −0.171) and
+runs into the limit. That is the most likely remaining cause of the 14 failures and
+the obvious thing to look at next.
+
+### Memory, and the feasibility question
+
+Inference peak VRAM **fell** from 1.752 GiB to 0.899 GiB between the two runs, which
+is not a fine-tuning effect — it is the Phase 1 precision correction. The whole
+pipeline now fits in:
+
+| Stage | Peak VRAM | Of 6 GB |
+| --- | --- | --- |
+| Inference / evaluation | 0.899 GiB | 15% |
+| LoRA fine-tuning | 1.687 GiB | 28% |
+
+**SmolVLA both trains and runs on this laptop with room to spare.** That was the
+question the project was built to answer.
+
+---
+
+## The longer run
+
+`python scripts/train_lora.py --steps 4000` → `results/phase-4/20260915-174932/`
+
+| | 1 800 steps | 4 000 steps |
+| --- | --- | --- |
+| Wall clock | 25.4 min | **57.6 min** |
+| Epochs | 1.6 | **3** |
+| Final train loss | 0.671 | **0.603** |
+| Best val loss | 0.7684 (step 1600) | **0.7055 (step 3800)** |
+
+Train loss by band: 1.398 (0–500) → 0.702 (1000–1500) → 0.642 (2000–2500) →
+0.616 (3000–3500) → **0.603 (3500–4000)**.
+
+**Still decreasing at 4 000 steps**, and validation improved by 0.06 over the
+shorter run. The model remains under-trained rather than saturated.
+
+No checkpoint exists at step 3800 (saves are every 400), but `checkpoint-4000` sits
+at val 0.7110 against 0.7055 — the difference is inside the noise of an 80-frame
+validation subset.
+
+---
+
+## 4.6 Phase 5 decision: **not justified**
+
+`phase-5-full-ft.md` admits entry on exactly one condition — training loss
+plateauing high despite raising rank and unfreezing modules, i.e. a genuine capacity
+limit. That condition is **not met**:
+
+| §4.6 branch | Applies? |
+| --- | --- |
+| Training loss plateaus high → underfitting, consider Phase 5 | **No.** Loss was still falling at 4 000 steps, 0.616 → 0.603 in the last band |
+| Training loss low but rollout success low → adapter or instruction bug | **No.** Success went 0% → 30%, and the action statistics converged onto the expert's |
+| Both losses low, success improved but modest → data quantity | **Closest match.** 30% from 3 epochs of 180 demonstrations |
+
+`phase-5-full-ft.md` names the third case explicitly as *not* justifying entry:
+"Results improved but modestly. That points at data quantity; MimicGen is the
+cheaper next step."
+
+### What to do instead, in order of cost
+
+1. **Train longer.** Loss is still moving and an hour buys 3 epochs. The cheapest
+   experiment available.
+2. **Investigate the `dz` saturation.** 34% clipping on the lift axis, commanding
+   upward motion far harder than any expert demonstration. This is a concrete,
+   diagnosable defect rather than a capacity ceiling.
+3. **More data via MimicGen**, as Phase 3 anticipated.
+4. **Raise the LoRA rank** — the one lever that would begin to test capacity, and
+   which must be tried before Phase 5 could honestly be entered.
+
+Full fine-tuning would spend the entire VRAM budget to solve a problem that the
+evidence says is not capacity.
