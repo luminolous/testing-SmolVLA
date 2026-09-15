@@ -191,6 +191,47 @@ settled.
 
 ---
 
+## The reset handle leak
+
+The first 20-episode attempt **crashed at episode 10**, inside `env.reset()`:
+
+```
+ValueError: Error: resource not found via provider or OS filesystem:
+  ...robosuite\models\assets\robots\panda\obj_meshes/link0_vis/link0_vis_9.obj
+```
+
+The file is present on disk the whole time, and episodes 0–9 had already used it.
+A missing asset would have failed at episode 0, so this is resource exhaustion, not
+a broken install.
+
+**Cause.** robosuite defaults to `hard_reset=True`, which destroys the simulation
+and rebuilds it from XML on *every* reset, re-reading 66+ Panda meshes plus gripper
+and arena assets each time. On Windows those file handles are not released, and
+around the tenth episode MuJoCo can no longer open the next mesh.
+
+**Fix.** `hard_reset=False` in
+[`lift_env.py`](../../src/envs/lift_env.py), so `reset()` calls `sim.reset()` on the
+existing simulation.
+
+Verified on two counts, because the cheap fix here would have quietly destroyed the
+evaluation:
+
+| Check | Result |
+| --- | --- |
+| 25 consecutive resets | all succeeded, no failure |
+| Distinct cube positions across those 25 | **25 unique** — randomisation intact |
+| 14 episodes through `rollout.py`, past the old crash point | no crash, VRAM flat at 1.75 GiB |
+
+Had randomisation been lost, every episode would have been identical and the
+success rate meaningless while still looking like a clean run.
+
+**Carry this into Phase 3.** Dataset regeneration replays hundreds of demonstrations
+and resets far more often than 20 times. Any regeneration path that builds its
+environment outside `make_lift_env` — robomimic constructs its own — will hit the
+same leak, much sooner.
+
+---
+
 ## 2.5 Baseline evaluation — **queued for the user**
 
 ```bash
@@ -231,6 +272,7 @@ which fine-tuning in Phases 3 and 4 is exactly the remedy for.
 
 | Finding | Matters in | Note |
 | --- | --- | --- |
+| `hard_reset=False` is required on Windows | **Phase 3** | Otherwise mesh file handles leak and MuJoCo fails after ~10 resets. Regeneration resets far more often than that, and robomimic builds its own environment |
 | State must be scaled before the model sees it | **Phase 3, 4** | LeRobot will not do it — no statistics ship with the checkpoint. The converted dataset must carry its own |
 | `IMAGE_CONVENTION = "opencv"` is required | **Phase 3** | Set globally so regenerated dataset images and rollout images agree. Verify it is still in effect when regenerating |
 | Rollout is ~2–4× slower than isolated measurement | Phase 3, 4 | Suspected CUDA/OpenGL contention. Confirm on the longer run before using isolated figures for estimates |

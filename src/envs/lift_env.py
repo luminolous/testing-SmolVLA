@@ -28,6 +28,7 @@ def make_lift_env(
     robot: str = "Panda",
     control_freq: int = 20,
     horizon: int = 200,
+    hard_reset: bool = False,
     **kwargs: Any,
 ):
     """Build the `Lift` environment with offscreen rendering.
@@ -42,6 +43,19 @@ def make_lift_env(
         robot: Robot model. Panda is 7-DoF with a parallel-jaw gripper.
         control_freq: Control frequency in Hz.
         horizon: Maximum steps per episode.
+        hard_reset: Left **off**, against robosuite's default.
+
+            With robosuite's default of True, every `reset()` destroys the sim and
+            rebuilds it from XML, re-reading 66+ Panda mesh files plus the gripper
+            and arena assets. On Windows those handles are not released, and after
+            about ten episodes MuJoCo fails to open the next mesh with
+            `ValueError: Error: resource not found via provider or OS filesystem:
+            ...link0_vis_9.obj` -- a file that is present on disk the whole time.
+            Observed crashing a 20-episode rollout at episode 10.
+
+            With it off, `reset()` calls `sim.reset()` on the existing simulation.
+            Verified over 25 consecutive resets: no failure, and all 25 episodes
+            still get distinct cube positions, so domain randomisation is intact.
 
     Returns:
         A constructed robosuite environment.
@@ -60,5 +74,6 @@ def make_lift_env(
         control_freq=control_freq,
         horizon=horizon,
         reward_shaping=False,
+        hard_reset=hard_reset,
         **kwargs,
     )
