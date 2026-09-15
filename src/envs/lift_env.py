@@ -28,7 +28,7 @@ def make_lift_env(
     robot: str = "Panda",
     control_freq: int = 20,
     horizon: int = 200,
-    hard_reset: bool = False,
+    hard_reset: bool = True,
     **kwargs: Any,
 ):
     """Build the `Lift` environment with offscreen rendering.
@@ -43,19 +43,20 @@ def make_lift_env(
         robot: Robot model. Panda is 7-DoF with a parallel-jaw gripper.
         control_freq: Control frequency in Hz.
         horizon: Maximum steps per episode.
-        hard_reset: Left **off**, against robosuite's default.
+        hard_reset: Kept **on**, matching robosuite's default. Only a hard reset
+            re-runs `_load_model()`, and `Lift` randomises the cube's size there
+            (`BoxObject(size_min=[0.020]*3, size_max=[0.022]*3)`). With it off the
+            cube keeps one fixed size for the whole run and only its position
+            varies.
 
-            With robosuite's default of True, every `reset()` destroys the sim and
-            rebuilds it from XML, re-reading 66+ Panda mesh files plus the gripper
-            and arena assets. On Windows those handles are not released, and after
-            about ten episodes MuJoCo fails to open the next mesh with
-            `ValueError: Error: resource not found via provider or OS filesystem:
-            ...link0_vis_9.obj` -- a file that is present on disk the whole time.
-            Observed crashing a 20-episode rollout at episode 10.
-
-            With it off, `reset()` calls `sim.reset()` on the existing simulation.
-            Verified over 25 consecutive resets: no failure, and all 25 episodes
-            still get distinct cube positions, so domain randomisation is intact.
+            This was briefly set to False to dodge a handle leak that crashed a
+            20-episode rollout at episode 10 with `resource not found via provider
+            or OS filesystem: ...link0_vis_9.obj`, for a file present on disk
+            throughout. The real cause turned out to be **mujoco 3.1.6**, which
+            leaks ~50 Windows handles per XML load; measured at +50 per reset,
+            failing at the tenth. mujoco 3.2.7 leaks zero over 60 consecutive
+            resets, so the version pin is the fix and the flag can stay at its
+            correct value.
 
     Returns:
         A constructed robosuite environment.

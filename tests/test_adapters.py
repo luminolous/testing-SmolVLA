@@ -25,7 +25,11 @@ from src.envs.action_adapter import (  # noqa: E402
     YAW_INDEX,
     ActionAdapter,
 )
-from src.envs.obs_adapter import DEFAULT_CAMERA_MAP, ObsAdapter  # noqa: E402
+from src.envs.obs_adapter import (  # noqa: E402
+    DEFAULT_CAMERA_MAP,
+    ObsAdapter,
+    upright,
+)
 
 RESOLUTION = 128
 
@@ -81,7 +85,7 @@ def test_cameras_are_not_swapped(real_observation):
     assert not np.allclose(wrist, scene), "both keys carry the same image"
 
     def to_chw(raw):
-        return np.transpose(raw, (2, 0, 1)).astype(np.float32) / 255.0
+        return np.transpose(upright(raw), (2, 0, 1)).astype(np.float32) / 255.0
 
     np.testing.assert_allclose(
         wrist, to_chw(real_observation["robot0_eye_in_hand_image"]), rtol=1e-6
@@ -89,6 +93,24 @@ def test_cameras_are_not_swapped(real_observation):
     np.testing.assert_allclose(
         scene, to_chw(real_observation["agentview_image"]), rtol=1e-6
     )
+
+
+def test_images_are_flipped_upright(real_observation):
+    """robosuite renders bottom-left-origin, so the adapter must flip.
+
+    Without this the model sees every scene upside down, which no shape or range
+    assertion can detect.
+    """
+    adapted = ObsAdapter()(real_observation)
+    raw = real_observation["agentview_image"]
+    got = adapted[DEFAULT_CAMERA_MAP["agentview"]]
+
+    np.testing.assert_allclose(
+        got, np.transpose(raw[::-1], (2, 0, 1)).astype(np.float32) / 255.0, rtol=1e-6
+    )
+    # And confirm the flip is not a no-op on this frame, which would make the
+    # assertion above vacuous.
+    assert not np.allclose(raw, raw[::-1])
 
 
 def test_images_are_not_blank(real_observation):

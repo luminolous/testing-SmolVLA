@@ -223,3 +223,6 @@ __marimo__/
 CLAUDE.md
 # Experiment outputs. Curated summaries live in docs/ instead.
 results/
+
+# Datasets: downloaded and regenerated, never committed.
+/data/

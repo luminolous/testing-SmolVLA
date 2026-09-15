@@ -1,9 +1,14 @@
 """robosuite observations to SmolVLA inputs.
 
-Image orientation is **not** handled here. robosuite is configured with
-``IMAGE_CONVENTION = "opencv"`` in `robosuite_compat.py`, so frames already arrive
-the right way up. Flipping here as well would double-correct, and would also
-desynchronise these rollouts from the images robomimic regenerates in Phase 3.
+Image orientation **is** handled here. robosuite renders with an OpenGL origin at
+bottom-left, so raw frames arrive flipped vertically, and :func:`upright` corrects
+them.
+
+Phase 2 originally fixed this globally with robosuite's ``IMAGE_CONVENTION``
+macro instead. That turned out to be wrong: robomimic flips every RGB observation
+unconditionally (``env_robosuite.py:190``), so the two corrections composed and
+Phase 3's regenerated dataset came out upside down. Each consumer now turns frames
+upright at the point of use, which is what robomimic already assumes.
 
 The state mapping is arbitrary and is documented as such. SmolVLA's base checkpoint
 expects 6 values that are SO-100 joint angles in degrees. A Panda has 7 joints.
@@ -36,6 +41,21 @@ GRIPPER_SCALE_DEG = 90.0
 # arctan2 returns an angle in (-180, 180], so this is the exact bound of the raw
 # state, not an estimate. Dividing by it maps the state into [-1, 1].
 JOINT_RANGE_DEG = 180.0
+
+
+def upright(image: np.ndarray) -> np.ndarray:
+    """Turn a raw robosuite frame the right way up.
+
+    robosuite renders in the OpenGL convention, origin bottom-left, so raw frames
+    are flipped vertically. Verified by eye in Phase 2: without this, `agentview`
+    puts the robot and floor at the bottom of the frame with the table above them,
+    and the wrist camera puts the gripper fingers at the top.
+
+    Use this anywhere a raw robosuite frame is shown or fed to a model. robomimic
+    applies the same flip itself, so data coming back from robomimic is already
+    upright and must not be passed through here.
+    """
+    return image[::-1]
 
 
 @dataclass
@@ -105,10 +125,10 @@ class ObsAdapter:
             if raw.ndim != 3 or raw.shape[2] != 3:
                 raise ValueError(f"{robosuite_cam}: expected (H, W, 3), got {raw.shape}")
 
-            # uint8 HWC [0, 255] -> float32 CHW [0, 1]. The policy rescales to
-            # [-1, 1] for SigLIP itself (modeling_smolvla.py:360); doing it here too
-            # would shift the input out of range.
-            img = np.transpose(raw, (2, 0, 1)).astype(np.float32) / 255.0
+            # Flip upright, then uint8 HWC [0, 255] -> float32 CHW [0, 1]. The policy
+            # rescales to [-1, 1] for SigLIP itself (modeling_smolvla.py:360); doing
+            # that here too would shift the input out of range.
+            img = np.transpose(upright(raw), (2, 0, 1)).astype(np.float32) / 255.0
             adapted[model_key] = img
             images.append(img)
 

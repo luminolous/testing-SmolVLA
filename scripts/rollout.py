@@ -145,10 +145,16 @@ def run_episode(
 def _save_frame(frame_dir: Path, episode: int, step: int, obs: dict) -> None:
     from PIL import Image
 
+    from src.envs.obs_adapter import upright
+
     for cam in ("agentview", "robot0_eye_in_hand"):
         key = f"{cam}_image"
         if key in obs:
-            Image.fromarray(obs[key]).save(frame_dir / f"ep{episode:02d}_s{step:03d}_{cam}.png")
+            # Saved frames must match what the model sees, or they are worse than
+            # useless for debugging.
+            Image.fromarray(upright(obs[key])).save(
+                frame_dir / f"ep{episode:02d}_s{step:03d}_{cam}.png"
+            )
 
 
 def summarise(
