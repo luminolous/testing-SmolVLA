@@ -221,3 +221,5 @@ __marimo__/
 # Agents
 .agents
 CLAUDE.md
+# Experiment outputs. Curated summaries live in docs/ instead.
+results/

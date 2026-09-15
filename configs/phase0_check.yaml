@@ -1,0 +1,29 @@
+# Phase 0 environment regression check.
+# Run at the start of every later phase: python scripts/check_env.py
+
+env:
+  name: Lift
+  robot: Panda
+  controller: OSC_POSE
+  control_freq: 20
+
+  # Wrist view is the primary input because the target deployment uses a wrist
+  # camera. agentview rides along so rollout failures are debuggable by eye.
+  # Changing this set is an open decision -- ask before editing.
+  cameras:
+    - robot0_eye_in_hand
+    - agentview
+
+  # Measured in Phase 0: per-step render cost is flat from 128 to 512 px, so
+  # resolution is not the expensive knob here, camera count is. The real value is
+  # set in Phase 1 from what SmolVLA's preprocessor expects.
+  resolution: 128
+
+benchmark:
+  warmup_steps: 15
+  timed_steps: 50
+
+vram:
+  # Hard ceiling from CLAUDE.md. Headroom is left for the OS, the display, and
+  # the MuJoCo offscreen context.
+  budget_gb: 5.0
